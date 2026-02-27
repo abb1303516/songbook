@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: songbook_postgres
+    ports:
+      - "127.0.0.1:5450:5432"
+    environment:
+      POSTGRES_USER: songbook
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: songbook
+    volumes:
+      - songbook_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U songbook"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: songbook_server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://songbook:${POSTGRES_PASSWORD}@postgres:5432/songbook
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      PORT: "3001"
+      NODE_ENV: production
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: songbook_client
+    depends_on:
+      - server
+    ports:
+      - "127.0.0.1:3000:80"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: songbook_caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - client
+    restart: unless-stopped
+
+volumes:
+  songbook_pgdata:
+  caddy_data:
+  caddy_config:
