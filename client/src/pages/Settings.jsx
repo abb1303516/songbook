@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { HexColorPicker } from 'react-colorful';
 import { useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
@@ -19,7 +19,6 @@ const COLOR_LABELS = [
 ];
 
 export default function Settings() {
-  const navigate = useNavigate();
   const { settings, updateSettings, applyTheme } = useSettings();
   const { colors } = settings;
   const [activeColor, setActiveColor] = useState(null);
@@ -30,11 +29,11 @@ export default function Settings() {
         className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <button onClick={() => navigate(-1)} className="p-1" style={{ color: colors.textMuted }}>
+        <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
-        </button>
+        </Link>
         <h1 className="text-lg font-semibold">Настройки</h1>
       </header>
 

@@ -107,9 +107,9 @@ export default function SongView() {
         className="flex-shrink-0 px-3 py-2 flex items-center gap-1.5"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <Link to="/" className="p-1" style={{ color: colors.textMuted }}>
+        <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
         </Link>
 

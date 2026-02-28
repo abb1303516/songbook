@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { fetchSong, fetchSongs, createSong, updateSong, deleteSong } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import SongContent from '../components/SongContent';
@@ -81,11 +81,11 @@ export default function SongEditor() {
         className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <button onClick={() => navigate(-1)} className="p-1" style={{ color: colors.textMuted }}>
+        <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
-        </button>
+        </Link>
         <h1 className="text-lg font-semibold flex-1">{isNew ? 'Новая песня' : 'Редактирование'}</h1>
         <button
           onClick={() => setShowPreview(!showPreview)}
