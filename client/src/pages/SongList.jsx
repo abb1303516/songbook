@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { fetchSongs, fetchSetlists } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
-import { chordToH } from '../utils/transpose';
+import { chordToH, transposeKey } from '../utils/transpose';
 
 export default function SongList() {
   const [songs, setSongs] = useState([]);
@@ -12,7 +12,7 @@ export default function SongList() {
   const [activeTags, setActiveTags] = useState([]);
   const [tab, setTab] = useState('songs'); // songs | setlists
   const [loading, setLoading] = useState(true);
-  const { settings } = useSettings();
+  const { settings, getSongSettings } = useSettings();
   const { colors } = settings;
   const { isAdmin, logout } = useAdmin();
 
@@ -204,7 +204,11 @@ export default function SongList() {
                   {song.artist && (
                     <div className="text-sm truncate" style={{ color: colors.textMuted }}>
                       {song.artist}
-                      {song.key && <span className="ml-2" style={{ color: colors.chords }}>{settings.useH ? chordToH(song.key) : song.key}</span>}
+                      {song.key && (() => {
+                        const t = getSongSettings(song.id).transpose;
+                        const k = t ? transposeKey(song.key, t) : song.key;
+                        return <span className="ml-2" style={{ color: colors.chords }}>{settings.useH ? chordToH(k) : k}</span>;
+                      })()}
                     </div>
                   )}
                 </Link>
