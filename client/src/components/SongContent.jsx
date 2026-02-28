@@ -16,47 +16,73 @@ export default function SongContent({
   containerRef,
 }) {
   const contentRef = useRef(null);
-  const [fitScale, setFitScale] = useState(1);
+  const [fittedFontSize, setFittedFontSize] = useState(null);
 
   const { sections } = useMemo(() => parseChordPro(chordpro || ''), [chordpro]);
 
-  const chordSize = Math.max(fontSize + chordSizeOffset * 2, 8);
+  const chordSize = Math.max((fittedFontSize || fontSize) + chordSizeOffset * 2, 8);
 
-  // Fit-to-screen calculation
+  // Fit-to-screen: binary search for optimal fontSize
   const recalcFit = useCallback(() => {
     if (!fitToScreen || !containerRef?.current || !contentRef.current) {
-      setFitScale(1);
+      setFittedFontSize(null);
       return;
     }
+
+    // Need a small delay to let the DOM render at base size first
     requestAnimationFrame(() => {
       const container = containerRef.current;
       const content = contentRef.current;
       if (!container || !content) return;
-      const ch = container.clientHeight;
-      const cw = container.clientWidth;
-      const sh = content.scrollHeight;
-      const sw = content.scrollWidth;
-      const scale = Math.min(ch / sh, cw / sw, 1);
-      setFitScale(Math.max(scale, 0.35));
+
+      const availH = container.clientHeight - 32; // padding
+      const availW = container.clientWidth - 32;
+
+      // Temporarily reset to measure natural size at base fontSize
+      const origFontSize = content.style.fontSize;
+      content.style.fontSize = `${fontSize}px`;
+
+      const naturalH = content.scrollHeight;
+      const naturalW = content.scrollWidth;
+
+      content.style.fontSize = origFontSize;
+
+      if (naturalH <= availH && naturalW <= availW) {
+        // Already fits, no change needed
+        setFittedFontSize(null);
+        return;
+      }
+
+      // Scale fontSize proportionally
+      const scaleH = availH / naturalH;
+      const scaleW = availW / naturalW;
+      const scale = Math.min(scaleH, scaleW, 1);
+      const newSize = Math.max(Math.floor(fontSize * scale), 8);
+
+      if (newSize < fontSize) {
+        setFittedFontSize(newSize);
+      } else {
+        setFittedFontSize(null);
+      }
     });
-  }, [fitToScreen, containerRef]);
+  }, [fitToScreen, containerRef, fontSize]);
 
   useEffect(() => {
     recalcFit();
-  }, [recalcFit, fontSize, chordSizeOffset, transpose, showChords, mono, lineHeight, chordpro]);
+  }, [recalcFit, chordSizeOffset, transpose, showChords, mono, lineHeight, chordpro]);
 
-  const contentStyle = fitToScreen
-    ? {
-        fontSize,
-        lineHeight,
-        transform: `scale(${fitScale})`,
-        transformOrigin: 'top left',
-        width: `${100 / fitScale}%`,
-      }
-    : { fontSize, lineHeight };
+  // Recalculate on window resize
+  useEffect(() => {
+    if (!fitToScreen) return;
+    const handleResize = () => recalcFit();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [fitToScreen, recalcFit]);
+
+  const effectiveFontSize = fittedFontSize || fontSize;
 
   return (
-    <div ref={contentRef} style={contentStyle}>
+    <div ref={contentRef} style={{ fontSize: effectiveFontSize, lineHeight }}>
       {sections.map((section, si) => {
         if (section.type === 'comment') {
           return (
@@ -86,7 +112,7 @@ export default function SongContent({
             {section.label && (
               <div
                 className="text-xs uppercase tracking-wider mb-1 font-semibold"
-                style={{ color: colors.textMuted || '#888', fontSize: fontSize * 0.7 }}
+                style={{ color: colors.textMuted || '#888', fontSize: effectiveFontSize * 0.7 }}
               >
                 {section.label}
               </div>

@@ -3,7 +3,7 @@
 Персональное веб-приложение для гитариста: хранение, просмотр и организация песен с аккордами.
 
 **Сервер:** `ssh wbcc`, проект `/opt/songbook`
-**Домен:** `abbsongs.duckdns.org` (DuckDNS, IP: 188.208.103.65)
+**Домен:** `abbsongs.duckdns.org` (DuckDNS, IP: 185.221.213.215)
 **GitHub:** https://github.com/abb1303516/songbook
 **Деплой:** `git push` → `ssh wbcc "cd /opt/songbook && git pull && docker compose up -d --build"`
 
@@ -72,9 +72,9 @@ POST   /api/admin/verify           # Проверить пароль
 
 ## Docker
 
-**Контейнеры:** songbook_postgres (:5450), songbook_server, songbook_client (:3000), songbook_caddy (:80/:443)
+**Контейнеры:** songbook_postgres (:5450), songbook_server (:3001), songbook_client (:3080)
 
-Все сервисы на 127.0.0.1 кроме Caddy (публичный).
+Все сервисы на 127.0.0.1. Внешний доступ через хостовый nginx + certbot SSL.
 
 **Файлы:** `docker-compose.yml` + `.env` (секреты, НЕ в git). Шаблон: `.env.example`
 
@@ -127,6 +127,6 @@ setlists (id, name, song_ids[], created_at, updated_at)
 | Импорт ChordPro (файл/текст) | Готово |
 | Экспорт коллекции | Готово |
 | Backend API (CRUD) | Готово |
-| Docker (4 контейнера) | Готово |
-| Деплой на сервер | Не начато |
-| DuckDNS + Caddy SSL | Не начато |
+| Docker (3 контейнера) | Готово |
+| Деплой на сервер | Готово |
+| DuckDNS + nginx SSL (certbot) | Готово |

@@ -6,7 +6,7 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
     : "'Source Sans 3', 'Segoe UI', system-ui, sans-serif";
 
   return (
-    <div className="leading-tight" style={{ fontFamily }}>
+    <div style={{ fontFamily }}>
       {showChords && pairs.some(p => p.chord) && (
         <div
           className="whitespace-pre font-semibold select-none"

@@ -41,11 +41,17 @@ export default function SongView() {
 
   const currentKey = song.key ? transposeKey(song.key, transpose) : '';
 
+  const btnStyle = (active) => ({
+    backgroundColor: active ? colors.chords : colors.bg,
+    color: active ? colors.bg : colors.textMuted,
+    border: `1px solid ${active ? colors.chords : colors.border}`,
+  });
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: colors.bg, color: colors.text }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2"
+        className="sticky top-0 z-10 px-3 py-2 flex items-center gap-1.5"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         <Link to="/" className="p-1" style={{ color: colors.textMuted }}>
@@ -62,17 +68,35 @@ export default function SongView() {
           </div>
         </div>
 
-        {/* Quick controls */}
+        {/* "В экран" button — always visible */}
+        <button
+          onClick={() => updateSongSettings(id, { fitToScreen: !fitToScreen })}
+          className="px-2 py-1 rounded text-xs font-medium"
+          style={btnStyle(fitToScreen)}
+          title="Вместить в экран"
+        >
+          В экран
+        </button>
+
+        {/* Controls toggle */}
         <button
           onClick={() => setShowControls(!showControls)}
           className="p-1.5 rounded"
           style={{ color: showControls ? colors.chords : colors.textMuted }}
-          title="Настройки"
+          title="Настройки просмотра"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
           </svg>
         </button>
+
+        {/* Settings page link */}
+        <Link to="/settings" className="p-1.5 rounded" style={{ color: colors.textMuted }} title="Настройки">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </Link>
       </header>
 
       {/* Controls panel */}
@@ -129,24 +153,9 @@ export default function SongView() {
           {/* Toggles row */}
           <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={() => updateSongSettings(id, { fitToScreen: !fitToScreen })}
-              className="px-2.5 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: fitToScreen ? colors.chords : colors.bg,
-                color: fitToScreen ? colors.bg : colors.textMuted,
-                border: `1px solid ${fitToScreen ? colors.chords : colors.border}`,
-              }}
-            >
-              В экран
-            </button>
-            <button
               onClick={() => updateSettings({ showChords: !settings.showChords })}
               className="px-2.5 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: settings.showChords ? colors.chords : colors.bg,
-                color: settings.showChords ? colors.bg : colors.textMuted,
-                border: `1px solid ${settings.showChords ? colors.chords : colors.border}`,
-              }}
+              style={btnStyle(settings.showChords)}
             >
               Аккорды
             </button>
