@@ -92,7 +92,7 @@ export function useLocalSettings() {
   }, []);
 
   const getSongSettings = useCallback((songId) => {
-    const defaults = { transpose: 0, fontSize: 16, lineHeight: 1.4, fitToScreen: false };
+    const defaults = { transpose: 0, fontSize: 16, lineHeight: 1.4, fitScale: null };
     return { ...defaults, ...settings.songSettings[songId] };
   }, [settings.songSettings]);
 

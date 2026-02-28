@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchSong } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
@@ -6,22 +6,72 @@ import { useAutoScroll } from '../hooks/useAutoScroll';
 import { transposeKey } from '../utils/transpose';
 import SongContent from '../components/SongContent';
 
+const FIT_STEP = 0.05; // 5% per click
+
 export default function SongView() {
   const { id } = useParams();
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showControls, setShowControls] = useState(false);
   const containerRef = useRef(null);
+  const contentRef = useRef(null);
   const { settings, getSongSettings, updateSongSettings, updateSettings } = useSettings();
   const { colors } = settings;
   const autoScroll = useAutoScroll(containerRef);
 
   const songSettings = getSongSettings(id);
-  const { transpose, fontSize, lineHeight, fitToScreen } = songSettings;
+  const { transpose, fontSize, lineHeight, fitScale } = songSettings;
+
+  // Effective values with fitScale applied
+  const effectiveFontSize = fitScale
+    ? Math.max(Math.round(fontSize * fitScale), 8)
+    : fontSize;
+  const effectiveLineHeight = fitScale
+    ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0)
+    : lineHeight;
 
   useEffect(() => {
     fetchSong(id).then(setSong).finally(() => setLoading(false));
   }, [id]);
+
+  // Auto-calculate optimal fitScale
+  const autoFit = useCallback(() => {
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) return;
+
+    // Temporarily measure at base fontSize/lineHeight
+    const prevFS = content.style.fontSize;
+    const prevLH = content.style.lineHeight;
+    content.style.fontSize = `${fontSize}px`;
+    content.style.lineHeight = `${lineHeight}`;
+
+    // Force reflow and measure
+    const naturalH = content.scrollHeight;
+    const naturalW = content.scrollWidth;
+
+    // Restore
+    content.style.fontSize = prevFS;
+    content.style.lineHeight = prevLH;
+
+    const availH = container.clientHeight;
+    const availW = container.clientWidth;
+
+    const scale = Math.min(availH / naturalH, availW / naturalW);
+    const clamped = Math.max(Math.min(scale, 2.0), 0.3);
+
+    updateSongSettings(id, { fitScale: +clamped.toFixed(3) });
+  }, [id, fontSize, lineHeight, updateSongSettings]);
+
+  const adjustFit = useCallback((delta) => {
+    const current = fitScale || 1.0;
+    const next = Math.max(Math.min(current + delta, 2.0), 0.3);
+    updateSongSettings(id, { fitScale: +next.toFixed(3) });
+  }, [id, fitScale, updateSongSettings]);
+
+  const resetFit = useCallback(() => {
+    updateSongSettings(id, { fitScale: null });
+  }, [id, updateSongSettings]);
 
   if (loading) {
     return (
@@ -68,15 +118,76 @@ export default function SongView() {
           </div>
         </div>
 
-        {/* "В экран" button — always visible */}
-        <button
-          onClick={() => updateSongSettings(id, { fitToScreen: !fitToScreen })}
-          className="px-2 py-1 rounded text-xs font-medium"
-          style={btnStyle(fitToScreen)}
-          title="Вместить в экран"
-        >
-          В экран
-        </button>
+        {/* Transpose compact control */}
+        <div className="flex items-center rounded overflow-hidden" style={{ border: `1px solid ${transpose !== 0 ? colors.chords : colors.border}` }}>
+          <button
+            onClick={() => updateSongSettings(id, { transpose: transpose - 1 })}
+            className="px-1.5 py-1 text-xs font-mono"
+            style={{
+              backgroundColor: transpose !== 0 ? colors.chords : colors.bg,
+              color: transpose !== 0 ? colors.bg : colors.textMuted,
+              borderRight: `1px solid ${transpose !== 0 ? 'rgba(255,255,255,0.2)' : colors.border}`,
+            }}
+            title="Тон вниз"
+          >♭</button>
+          <button
+            onClick={() => updateSongSettings(id, { transpose: 0 })}
+            className="px-1.5 py-1 text-xs font-medium"
+            style={{
+              backgroundColor: transpose !== 0 ? colors.chords : colors.bg,
+              color: transpose !== 0 ? colors.bg : colors.textMuted,
+              minWidth: '28px',
+            }}
+            title={transpose !== 0 ? 'Сбросить' : 'Тональность'}
+          >
+            {transpose !== 0 ? (transpose > 0 ? `+${transpose}` : `${transpose}`) : '♮'}
+          </button>
+          <button
+            onClick={() => updateSongSettings(id, { transpose: transpose + 1 })}
+            className="px-1.5 py-1 text-xs font-mono"
+            style={{
+              backgroundColor: transpose !== 0 ? colors.chords : colors.bg,
+              color: transpose !== 0 ? colors.bg : colors.textMuted,
+              borderLeft: `1px solid ${transpose !== 0 ? 'rgba(255,255,255,0.2)' : colors.border}`,
+            }}
+            title="Тон вверх"
+          >#</button>
+        </div>
+
+        {/* Fit-to-screen 3-part control */}
+        <div className="flex items-center rounded overflow-hidden" style={{ border: `1px solid ${fitScale ? colors.chords : colors.border}` }}>
+          <button
+            onClick={() => adjustFit(-FIT_STEP)}
+            className="px-1.5 py-1 text-xs font-mono"
+            style={{
+              backgroundColor: fitScale ? colors.chords : colors.bg,
+              color: fitScale ? colors.bg : colors.textMuted,
+              borderRight: `1px solid ${fitScale ? 'rgba(255,255,255,0.2)' : colors.border}`,
+            }}
+            title="Уменьшить"
+          >−</button>
+          <button
+            onClick={fitScale ? resetFit : autoFit}
+            className="px-2 py-1 text-xs font-medium"
+            style={{
+              backgroundColor: fitScale ? colors.chords : colors.bg,
+              color: fitScale ? colors.bg : colors.textMuted,
+            }}
+            title={fitScale ? 'Сбросить' : 'Вписать в экран'}
+          >
+            {fitScale ? `${Math.round(fitScale * 100)}%` : 'В экран'}
+          </button>
+          <button
+            onClick={() => adjustFit(FIT_STEP)}
+            className="px-1.5 py-1 text-xs font-mono"
+            style={{
+              backgroundColor: fitScale ? colors.chords : colors.bg,
+              color: fitScale ? colors.bg : colors.textMuted,
+              borderLeft: `1px solid ${fitScale ? 'rgba(255,255,255,0.2)' : colors.border}`,
+            }}
+            title="Увеличить"
+          >+</button>
+        </div>
 
         {/* Controls toggle */}
         <button
@@ -102,7 +213,7 @@ export default function SongView() {
       {/* Controls panel */}
       {showControls && (
         <div
-          className="px-4 py-3 space-y-3 text-sm"
+          className="flex-shrink-0 px-4 py-3 space-y-3 text-sm"
           style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
         >
           {/* Transpose */}
@@ -193,19 +304,19 @@ export default function SongView() {
 
       {/* Song content */}
       <div ref={containerRef} className="flex-1 overflow-auto px-4 py-4">
-        <SongContent
-          chordpro={song.chordpro}
-          transpose={transpose}
-          showChords={settings.showChords}
-          fontSize={fontSize}
-          lineHeight={lineHeight}
-          chordColor={colors.chords}
-          chordSizeOffset={settings.chordSizeOffset}
-          mono={settings.mono}
-          fitToScreen={fitToScreen}
-          colors={colors}
-          containerRef={containerRef}
-        />
+        <div ref={contentRef}>
+          <SongContent
+            chordpro={song.chordpro}
+            transpose={transpose}
+            showChords={settings.showChords}
+            fontSize={effectiveFontSize}
+            lineHeight={effectiveLineHeight}
+            chordColor={colors.chords}
+            chordSizeOffset={settings.chordSizeOffset}
+            mono={settings.mono}
+            colors={colors}
+          />
+        </div>
       </div>
     </div>
   );

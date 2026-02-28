@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
+import { useMemo } from 'react';
 import { parseChordPro } from '../utils/chordpro';
 import SongLine from './SongLine';
 
@@ -11,69 +11,14 @@ export default function SongContent({
   chordColor = '#6bb3ff',
   chordSizeOffset = 0,
   mono = false,
-  fitToScreen = false,
   colors = {},
-  containerRef,
 }) {
-  const contentRef = useRef(null);
-  const [fitScale, setFitScale] = useState(null); // null = no fit, number = scale factor
-
   const { sections } = useMemo(() => parseChordPro(chordpro || ''), [chordpro]);
 
-  const effectiveFontSize = fitScale ? Math.max(Math.round(fontSize * fitScale), 8) : fontSize;
-  const effectiveLineHeight = fitScale ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0) : lineHeight;
-  const chordSize = Math.max(effectiveFontSize + chordSizeOffset * 2, 8);
-
-  // Fit-to-screen calculation
-  const recalcFit = useCallback(() => {
-    if (!fitToScreen || !containerRef?.current || !contentRef.current) {
-      setFitScale(null);
-      return;
-    }
-
-    const container = containerRef.current;
-    const content = contentRef.current;
-
-    // Temporarily measure at base fontSize/lineHeight
-    const prevFS = content.style.fontSize;
-    const prevLH = content.style.lineHeight;
-    content.style.fontSize = `${fontSize}px`;
-    content.style.lineHeight = `${lineHeight}`;
-
-    // Force reflow and measure
-    const naturalH = content.scrollHeight;
-    const naturalW = content.scrollWidth;
-
-    // Restore
-    content.style.fontSize = prevFS;
-    content.style.lineHeight = prevLH;
-
-    const availH = container.clientHeight;
-    const availW = container.clientWidth;
-
-    if (naturalH <= availH && naturalW <= availW) {
-      setFitScale(null);
-      return;
-    }
-
-    const scale = Math.min(availH / naturalH, availW / naturalW);
-    setFitScale(Math.max(scale, 0.3));
-  }, [fitToScreen, containerRef, fontSize, lineHeight]);
-
-  useEffect(() => {
-    recalcFit();
-  }, [recalcFit, chordSizeOffset, transpose, showChords, mono, chordpro]);
-
-  // Recalculate on window resize
-  useEffect(() => {
-    if (!fitToScreen) return;
-    const handleResize = () => recalcFit();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [fitToScreen, recalcFit]);
+  const chordSize = Math.max(fontSize + chordSizeOffset * 2, 8);
 
   return (
-    <div ref={contentRef} style={{ fontSize: effectiveFontSize, lineHeight: effectiveLineHeight }}>
+    <div style={{ fontSize, lineHeight }}>
       {sections.map((section, si) => {
         if (section.type === 'comment') {
           return (
@@ -103,7 +48,7 @@ export default function SongContent({
             {section.label && (
               <div
                 className="text-xs uppercase tracking-wider mb-1 font-semibold"
-                style={{ color: colors.textMuted || '#888', fontSize: effectiveFontSize * 0.7 }}
+                style={{ color: colors.textMuted || '#888', fontSize: fontSize * 0.7 }}
               >
                 {section.label}
               </div>

@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchSetlist } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import { transposeKey } from '../utils/transpose';
 import SongContent from '../components/SongContent';
+
+const FIT_STEP = 0.05;
 
 export default function SetlistView() {
   const { id } = useParams();
@@ -13,6 +15,7 @@ export default function SetlistView() {
   const [loading, setLoading] = useState(true);
   const [showControls, setShowControls] = useState(false);
   const containerRef = useRef(null);
+  const contentRef = useRef(null);
   const { settings, getSongSettings, updateSongSettings, updateSettings } = useSettings();
   const { colors } = settings;
   const autoScroll = useAutoScroll(containerRef);
@@ -23,13 +26,60 @@ export default function SetlistView() {
 
   const song = setlist?.songs?.[currentIdx];
   const songSettings = getSongSettings(song?.id || '');
-  const { transpose, fontSize, lineHeight, fitToScreen } = songSettings;
+  const { transpose, fontSize, lineHeight, fitScale } = songSettings;
+
+  // Effective values with fitScale applied
+  const effectiveFontSize = fitScale
+    ? Math.max(Math.round(fontSize * fitScale), 8)
+    : fontSize;
+  const effectiveLineHeight = fitScale
+    ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0)
+    : lineHeight;
 
   const goTo = (idx) => {
     setCurrentIdx(idx);
     autoScroll.setOn(false);
     if (containerRef.current) containerRef.current.scrollTop = 0;
   };
+
+  // Auto-calculate optimal fitScale
+  const autoFit = useCallback(() => {
+    if (!song) return;
+    const container = containerRef.current;
+    const content = contentRef.current;
+    if (!container || !content) return;
+
+    const prevFS = content.style.fontSize;
+    const prevLH = content.style.lineHeight;
+    content.style.fontSize = `${fontSize}px`;
+    content.style.lineHeight = `${lineHeight}`;
+
+    const naturalH = content.scrollHeight;
+    const naturalW = content.scrollWidth;
+
+    content.style.fontSize = prevFS;
+    content.style.lineHeight = prevLH;
+
+    const availH = container.clientHeight;
+    const availW = container.clientWidth;
+
+    const scale = Math.min(availH / naturalH, availW / naturalW);
+    const clamped = Math.max(Math.min(scale, 2.0), 0.3);
+
+    updateSongSettings(song.id, { fitScale: +clamped.toFixed(3) });
+  }, [song, fontSize, lineHeight, updateSongSettings]);
+
+  const adjustFit = useCallback((delta) => {
+    if (!song) return;
+    const current = fitScale || 1.0;
+    const next = Math.max(Math.min(current + delta, 2.0), 0.3);
+    updateSongSettings(song.id, { fitScale: +next.toFixed(3) });
+  }, [song, fitScale, updateSongSettings]);
+
+  const resetFit = useCallback(() => {
+    if (!song) return;
+    updateSongSettings(song.id, { fitScale: null });
+  }, [song, updateSongSettings]);
 
   if (loading) {
     return (
@@ -72,7 +122,7 @@ export default function SetlistView() {
     <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       {/* Header */}
       <header
-        className="flex-shrink-0 px-4 py-2 flex items-center gap-2"
+        className="flex-shrink-0 px-3 py-2 flex items-center gap-1.5"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         <Link to="/" className="p-1" style={{ color: colors.textMuted }}>
@@ -109,20 +159,42 @@ export default function SetlistView() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
         </button>
 
-        {/* "В экран" button */}
-        <button
-          onClick={() => updateSongSettings(song.id, { fitToScreen: !fitToScreen })}
-          className="px-2 py-1 rounded text-xs font-medium"
-          style={{
-            backgroundColor: fitToScreen ? colors.chords : colors.bg,
-            color: fitToScreen ? colors.bg : colors.textMuted,
-            border: `1px solid ${fitToScreen ? colors.chords : colors.border}`,
-          }}
-          title="Вместить в экран"
-        >
-          В экран
-        </button>
+        {/* Fit-to-screen 3-part control */}
+        <div className="flex items-center rounded overflow-hidden" style={{ border: `1px solid ${fitScale ? colors.chords : colors.border}` }}>
+          <button
+            onClick={() => adjustFit(-FIT_STEP)}
+            className="px-1.5 py-1 text-xs font-mono"
+            style={{
+              backgroundColor: fitScale ? colors.chords : colors.bg,
+              color: fitScale ? colors.bg : colors.textMuted,
+              borderRight: `1px solid ${fitScale ? 'rgba(255,255,255,0.2)' : colors.border}`,
+            }}
+            title="Уменьшить"
+          >−</button>
+          <button
+            onClick={fitScale ? resetFit : autoFit}
+            className="px-2 py-1 text-xs font-medium"
+            style={{
+              backgroundColor: fitScale ? colors.chords : colors.bg,
+              color: fitScale ? colors.bg : colors.textMuted,
+            }}
+            title={fitScale ? 'Сбросить' : 'Вписать в экран'}
+          >
+            {fitScale ? `${Math.round(fitScale * 100)}%` : 'В экран'}
+          </button>
+          <button
+            onClick={() => adjustFit(FIT_STEP)}
+            className="px-1.5 py-1 text-xs font-mono"
+            style={{
+              backgroundColor: fitScale ? colors.chords : colors.bg,
+              color: fitScale ? colors.bg : colors.textMuted,
+              borderLeft: `1px solid ${fitScale ? 'rgba(255,255,255,0.2)' : colors.border}`,
+            }}
+            title="Увеличить"
+          >+</button>
+        </div>
 
+        {/* Controls toggle */}
         <button
           onClick={() => setShowControls(!showControls)}
           className="p-1.5 rounded"
@@ -144,36 +216,24 @@ export default function SetlistView() {
       {/* Controls */}
       {showControls && (
         <div
-          className="px-4 py-3 space-y-3 text-sm"
+          className="flex-shrink-0 px-4 py-3 space-y-3 text-sm"
           style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
         >
-          <div className="flex items-center gap-2">
-            <span className="w-24" style={{ color: colors.textMuted }}>Тональность</span>
-            <button
-              onClick={() => updateSongSettings(song.id, { transpose: transpose - 1 })}
-              className="px-2 py-0.5 rounded font-mono"
-              style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
-            >−</button>
-            <span className="w-8 text-center font-mono">{transpose > 0 ? '+' : ''}{transpose}</span>
-            <button
-              onClick={() => updateSongSettings(song.id, { transpose: transpose + 1 })}
-              className="px-2 py-0.5 rounded font-mono"
-              style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
-            >+</button>
-          </div>
-
+          {/* Font size */}
           <div className="flex items-center gap-2">
             <span className="w-24" style={{ color: colors.textMuted }}>Шрифт</span>
             <input type="range" min="10" max="28" value={fontSize} onChange={e => updateSongSettings(song.id, { fontSize: +e.target.value })} className="flex-1" />
             <span className="w-8 text-center font-mono text-xs">{fontSize}</span>
           </div>
 
+          {/* Line height */}
           <div className="flex items-center gap-2">
             <span className="w-24" style={{ color: colors.textMuted }}>Интервал</span>
             <input type="range" min="1.0" max="2.0" step="0.1" value={lineHeight} onChange={e => updateSongSettings(song.id, { lineHeight: +e.target.value })} className="flex-1" />
             <span className="w-8 text-center font-mono text-xs">{lineHeight}</span>
           </div>
 
+          {/* Toggles */}
           <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => updateSettings({ showChords: !settings.showChords })}
@@ -184,6 +244,8 @@ export default function SetlistView() {
                 border: `1px solid ${settings.showChords ? colors.chords : colors.border}`,
               }}
             >Аккорды</button>
+
+            {/* Auto-scroll */}
             <button
               onClick={() => autoScroll.setOn(!autoScroll.on)}
               className="px-2.5 py-1 rounded text-xs font-medium"
@@ -199,19 +261,19 @@ export default function SetlistView() {
 
       {/* Song content */}
       <div ref={containerRef} className="flex-1 overflow-auto px-4 py-4">
-        <SongContent
-          chordpro={song.chordpro}
-          transpose={transpose}
-          showChords={settings.showChords}
-          fontSize={fontSize}
-          lineHeight={lineHeight}
-          chordColor={colors.chords}
-          chordSizeOffset={settings.chordSizeOffset}
-          mono={settings.mono}
-          fitToScreen={fitToScreen}
-          colors={colors}
-          containerRef={containerRef}
-        />
+        <div ref={contentRef}>
+          <SongContent
+            chordpro={song.chordpro}
+            transpose={transpose}
+            showChords={settings.showChords}
+            fontSize={effectiveFontSize}
+            lineHeight={effectiveLineHeight}
+            chordColor={colors.chords}
+            chordSizeOffset={settings.chordSizeOffset}
+            mono={settings.mono}
+            colors={colors}
+          />
+        </div>
       </div>
     </div>
   );
