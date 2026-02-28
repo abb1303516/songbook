@@ -16,60 +16,53 @@ export default function SongContent({
   containerRef,
 }) {
   const contentRef = useRef(null);
-  const [fittedFontSize, setFittedFontSize] = useState(null);
+  const [fitScale, setFitScale] = useState(null); // null = no fit, number = scale factor
 
   const { sections } = useMemo(() => parseChordPro(chordpro || ''), [chordpro]);
 
-  const chordSize = Math.max((fittedFontSize || fontSize) + chordSizeOffset * 2, 8);
+  const effectiveFontSize = fitScale ? Math.max(Math.round(fontSize * fitScale), 8) : fontSize;
+  const effectiveLineHeight = fitScale ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0) : lineHeight;
+  const chordSize = Math.max(effectiveFontSize + chordSizeOffset * 2, 8);
 
-  // Fit-to-screen: binary search for optimal fontSize
+  // Fit-to-screen calculation
   const recalcFit = useCallback(() => {
     if (!fitToScreen || !containerRef?.current || !contentRef.current) {
-      setFittedFontSize(null);
+      setFitScale(null);
       return;
     }
 
-    // Need a small delay to let the DOM render at base size first
-    requestAnimationFrame(() => {
-      const container = containerRef.current;
-      const content = contentRef.current;
-      if (!container || !content) return;
+    const container = containerRef.current;
+    const content = contentRef.current;
 
-      const availH = container.clientHeight - 32; // padding
-      const availW = container.clientWidth - 32;
+    // Temporarily measure at base fontSize/lineHeight
+    const prevFS = content.style.fontSize;
+    const prevLH = content.style.lineHeight;
+    content.style.fontSize = `${fontSize}px`;
+    content.style.lineHeight = `${lineHeight}`;
 
-      // Temporarily reset to measure natural size at base fontSize
-      const origFontSize = content.style.fontSize;
-      content.style.fontSize = `${fontSize}px`;
+    // Force reflow and measure
+    const naturalH = content.scrollHeight;
+    const naturalW = content.scrollWidth;
 
-      const naturalH = content.scrollHeight;
-      const naturalW = content.scrollWidth;
+    // Restore
+    content.style.fontSize = prevFS;
+    content.style.lineHeight = prevLH;
 
-      content.style.fontSize = origFontSize;
+    const availH = container.clientHeight;
+    const availW = container.clientWidth;
 
-      if (naturalH <= availH && naturalW <= availW) {
-        // Already fits, no change needed
-        setFittedFontSize(null);
-        return;
-      }
+    if (naturalH <= availH && naturalW <= availW) {
+      setFitScale(null);
+      return;
+    }
 
-      // Scale fontSize proportionally
-      const scaleH = availH / naturalH;
-      const scaleW = availW / naturalW;
-      const scale = Math.min(scaleH, scaleW, 1);
-      const newSize = Math.max(Math.floor(fontSize * scale), 8);
-
-      if (newSize < fontSize) {
-        setFittedFontSize(newSize);
-      } else {
-        setFittedFontSize(null);
-      }
-    });
-  }, [fitToScreen, containerRef, fontSize]);
+    const scale = Math.min(availH / naturalH, availW / naturalW);
+    setFitScale(Math.max(scale, 0.3));
+  }, [fitToScreen, containerRef, fontSize, lineHeight]);
 
   useEffect(() => {
     recalcFit();
-  }, [recalcFit, chordSizeOffset, transpose, showChords, mono, lineHeight, chordpro]);
+  }, [recalcFit, chordSizeOffset, transpose, showChords, mono, chordpro]);
 
   // Recalculate on window resize
   useEffect(() => {
@@ -79,10 +72,8 @@ export default function SongContent({
     return () => window.removeEventListener('resize', handleResize);
   }, [fitToScreen, recalcFit]);
 
-  const effectiveFontSize = fittedFontSize || fontSize;
-
   return (
-    <div ref={contentRef} style={{ fontSize: effectiveFontSize, lineHeight }}>
+    <div ref={contentRef} style={{ fontSize: effectiveFontSize, lineHeight: effectiveLineHeight }}>
       {sections.map((section, si) => {
         if (section.type === 'comment') {
           return (

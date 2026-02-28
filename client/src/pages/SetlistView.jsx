@@ -69,10 +69,10 @@ export default function SetlistView() {
   const total = setlist.songs.length;
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: colors.bg, color: colors.text }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2"
+        className="flex-shrink-0 px-4 py-2 flex items-center gap-2"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         <Link to="/" className="p-1" style={{ color: colors.textMuted }}>

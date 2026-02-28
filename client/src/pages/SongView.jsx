@@ -48,10 +48,10 @@ export default function SongView() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: colors.bg, color: colors.text }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       {/* Header */}
       <header
-        className="sticky top-0 z-10 px-3 py-2 flex items-center gap-1.5"
+        className="flex-shrink-0 px-3 py-2 flex items-center gap-1.5"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         <Link to="/" className="p-1" style={{ color: colors.textMuted }}>
