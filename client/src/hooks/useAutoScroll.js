@@ -15,14 +15,15 @@ export function useAutoScroll(containerRef) {
   const speedRef = useRef(speed);
   const rafId = useRef(null);
   const lastTime = useRef(null);
+  const accum = useRef(0);
 
-  // Ref keeps speed in sync without restarting the animation loop
   speedRef.current = speed;
 
   useEffect(() => {
     if (!on) return;
 
     lastTime.current = null;
+    accum.current = 0;
 
     function tick() {
       const el = containerRef.current;
@@ -30,7 +31,12 @@ export function useAutoScroll(containerRef) {
       if (el && lastTime.current !== null) {
         const dt = (now - lastTime.current) / 1000;
         const pxPerSec = MIN_SPEED + (MAX_SPEED - MIN_SPEED) * (speedRef.current / 100);
-        el.scrollTop += pxPerSec * dt;
+        accum.current += pxPerSec * dt;
+        if (accum.current >= 1) {
+          const px = Math.floor(accum.current);
+          el.scrollTop += px;
+          accum.current -= px;
+        }
       }
       lastTime.current = now;
       rafId.current = requestAnimationFrame(tick);
