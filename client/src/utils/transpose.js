@@ -24,3 +24,12 @@ export function transposeKey(key, semitones) {
   if (!key || !semitones) return key;
   return transposeChord(key, semitones);
 }
+
+// Convert B-notation to H-notation for display
+// B → H, Bb → B, Bm → Hm, Bb7 → B7, etc.
+export function chordToH(chord) {
+  if (!chord) return chord;
+  if (chord.startsWith('Bb')) return 'B' + chord.slice(2);
+  if (chord.startsWith('B')) return 'H' + chord.slice(1);
+  return chord;
+}

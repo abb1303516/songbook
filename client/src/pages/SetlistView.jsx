@@ -4,7 +4,7 @@ import { fetchSetlist } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
-import { transposeKey } from '../utils/transpose';
+import { transposeKey, chordToH } from '../utils/transpose';
 import SongContent from '../components/SongContent';
 
 const FIT_STEP = 0.05;
@@ -117,7 +117,8 @@ export default function SetlistView() {
     );
   }
 
-  const currentKey = song.key ? transposeKey(song.key, transpose) : '';
+  const rawKey = song.key ? transposeKey(song.key, transpose) : '';
+  const currentKey = settings.useH ? chordToH(rawKey) : rawKey;
   const total = setlist.songs.length;
 
   return (
@@ -283,6 +284,7 @@ export default function SetlistView() {
             chordColor={colors.chords}
             chordSizeOffset={settings.chordSizeOffset}
             mono={settings.mono}
+            useH={settings.useH}
             colors={colors}
           />
         </div>

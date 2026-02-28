@@ -59,6 +59,7 @@ const DEFAULT_SETTINGS = {
   mono: false,
   chordSizeOffset: 0,
   showChords: true,
+  useH: true,
   autoScrollSpeed: 30,
   songSettings: {},
 };

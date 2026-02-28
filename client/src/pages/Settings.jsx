@@ -120,8 +120,8 @@ export default function Settings() {
           </div>
         </section>
 
-        {/* Mono font */}
-        <section>
+        {/* Toggles */}
+        <section className="space-y-3">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -130,6 +130,15 @@ export default function Settings() {
               className="w-4 h-4"
             />
             <span className="text-sm">Моноширинный шрифт</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.useH}
+              onChange={e => updateSettings({ useH: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <span className="text-sm">Нотация H (Hm вместо Bm)</span>
           </label>
         </section>
       </div>

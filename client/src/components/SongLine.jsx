@@ -1,6 +1,6 @@
-import { transposeChord } from '../utils/transpose';
+import { transposeChord, chordToH } from '../utils/transpose';
 
-export default function SongLine({ pairs, transpose = 0, showChords = true, chordColor, chordSize, mono }) {
+export default function SongLine({ pairs, transpose = 0, showChords = true, chordColor, chordSize, mono, useH = false }) {
   const fontFamily = mono
     ? "'Source Code Pro', 'Fira Mono', 'Courier New', monospace"
     : "'Source Sans 3', 'Segoe UI', system-ui, sans-serif";
@@ -13,7 +13,8 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
           style={{ color: chordColor, fontSize: chordSize }}
         >
           {pairs.map((p, i) => {
-            const chord = p.chord ? transposeChord(p.chord, transpose) : '';
+            let chord = p.chord ? transposeChord(p.chord, transpose) : '';
+            if (useH && chord) chord = chordToH(chord);
             // Pad chord to match text width below
             const textLen = p.text.length;
             const chordLen = chord.length;

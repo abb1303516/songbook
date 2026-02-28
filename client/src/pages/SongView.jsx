@@ -4,7 +4,7 @@ import { fetchSong } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
-import { transposeKey } from '../utils/transpose';
+import { transposeKey, chordToH } from '../utils/transpose';
 import SongContent from '../components/SongContent';
 
 const FIT_STEP = 0.05; // 5% per click
@@ -91,7 +91,8 @@ export default function SongView() {
     );
   }
 
-  const currentKey = song.key ? transposeKey(song.key, transpose) : '';
+  const rawKey = song.key ? transposeKey(song.key, transpose) : '';
+  const currentKey = settings.useH ? chordToH(rawKey) : rawKey;
 
   const btnStyle = (active) => ({
     backgroundColor: active ? colors.chords : colors.bg,
@@ -326,6 +327,7 @@ export default function SongView() {
             chordColor={colors.chords}
             chordSizeOffset={settings.chordSizeOffset}
             mono={settings.mono}
+            useH={settings.useH}
             colors={colors}
           />
         </div>
