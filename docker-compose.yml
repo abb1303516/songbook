@@ -38,24 +38,8 @@ services:
     depends_on:
       - server
     ports:
-      - "127.0.0.1:3000:80"
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:2-alpine
-    container_name: songbook_caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - client
+      - "127.0.0.1:3080:80"
     restart: unless-stopped
 
 volumes:
   songbook_pgdata:
-  caddy_data:
-  caddy_config:
