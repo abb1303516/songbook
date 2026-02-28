@@ -1,52 +1,48 @@
-import { useState, useEffect } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { verifyAdmin } from '../api/songs';
+import { useState } from 'react';
+import { Link, Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
+import { useAdmin } from '../context/AdminContext';
 
 export default function Admin() {
-  const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [checking, setChecking] = useState(true);
   const { settings } = useSettings();
   const { colors } = settings;
+  const { isAdmin, checking, login } = useAdmin();
+  const location = useLocation();
 
-  // Check if already authenticated
-  useEffect(() => {
-    const saved = localStorage.getItem('songbook-admin-password');
-    if (saved) {
-      verifyAdmin(saved).then(ok => {
-        if (ok) setAuthenticated(true);
-        else localStorage.removeItem('songbook-admin-password');
-      }).finally(() => setChecking(false));
-    } else {
-      setChecking(false);
-    }
-  }, []);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    const ok = await verifyAdmin(password);
-    if (ok) {
-      localStorage.setItem('songbook-admin-password', password);
-      setAuthenticated(true);
-    } else {
-      setError('Неверный пароль');
-    }
-  };
+  const isIndexRoute = location.pathname === '/admin' || location.pathname === '/admin/';
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.bg, color: colors.textMuted }}>
+      <div className="min-h-screen flex items-center justify-center"
+           style={{ backgroundColor: colors.bg, color: colors.textMuted }}>
         Проверка...
       </div>
     );
   }
 
-  if (!authenticated) {
+  // Logged in on /admin index → redirect to catalog
+  if (isAdmin && isIndexRoute) {
+    return <Navigate to="/" replace />;
+  }
+
+  // Not logged in → show login form
+  if (!isAdmin) {
+    const handleLogin = async (e) => {
+      e.preventDefault();
+      setError('');
+      const ok = await login(password);
+      if (ok) {
+        // Will re-render: if on index, Navigate kicks in; if on child route, Outlet renders
+      } else {
+        setError('Неверный пароль');
+      }
+    };
+
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.bg, color: colors.text }}>
+      <div className="min-h-screen flex items-center justify-center"
+           style={{ backgroundColor: colors.bg, color: colors.text }}>
         <form onSubmit={handleLogin} className="w-72 space-y-4">
           <h1 className="text-xl font-bold text-center">Админка</h1>
           <input
@@ -74,70 +70,6 @@ export default function Admin() {
     );
   }
 
+  // Logged in + child route → render editor/import
   return <Outlet />;
-}
-
-export function AdminDashboard() {
-  const { settings } = useSettings();
-  const { colors } = settings;
-
-  const links = [
-    { to: '/admin/songs/new', label: 'Добавить песню', icon: '+' },
-    { to: '/admin/setlists/new', label: 'Создать сет-лист', icon: '+' },
-    { to: '/admin/import', label: 'Импорт ChordPro', icon: '↓' },
-    { to: '/api/export', label: 'Экспорт коллекции', icon: '↑', external: true },
-  ];
-
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.bg, color: colors.text }}>
-      <header
-        className="px-4 py-3 flex items-center gap-3"
-        style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
-      >
-        <Link to="/" className="p-1" style={{ color: colors.textMuted }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </Link>
-        <h1 className="text-lg font-semibold">Админка</h1>
-      </header>
-
-      <div className="p-4 space-y-3 max-w-lg mx-auto">
-        {links.map(({ to, label, icon, external }) =>
-          external ? (
-            <a
-              key={to}
-              href={to}
-              className="block px-4 py-3 rounded-lg text-sm font-medium"
-              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}
-            >
-              <span className="mr-2">{icon}</span> {label}
-            </a>
-          ) : (
-            <Link
-              key={to}
-              to={to}
-              className="block px-4 py-3 rounded-lg text-sm font-medium"
-              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}
-            >
-              <span className="mr-2">{icon}</span> {label}
-            </Link>
-          )
-        )}
-
-        <div className="pt-4">
-          <button
-            onClick={() => {
-              localStorage.removeItem('songbook-admin-password');
-              window.location.href = '/';
-            }}
-            className="text-sm"
-            style={{ color: colors.textMuted }}
-          >
-            Выйти из админки
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
