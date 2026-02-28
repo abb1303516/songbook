@@ -302,8 +302,8 @@ export default function SongView() {
               <>
                 <input
                   type="range"
-                  min="15"
-                  max="60"
+                  min="0"
+                  max="100"
                   value={autoScroll.speed}
                   onChange={e => autoScroll.setSpeed(+e.target.value)}
                   className="flex-1"
