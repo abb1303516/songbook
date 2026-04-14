@@ -121,10 +121,10 @@ export default function SongView() {
           {isAdmin && (
             <Link
               to={`/admin/songs/${id}`}
-              className="inline-block mt-0.5 px-1.5 py-0 rounded"
-              style={{ color: colors.textMuted, border: `1px solid ${colors.border}`, fontSize: 10 }}
+              className="inline-block mt-0.5 px-1.5 py-0 rounded text-xs"
+              style={{ color: colors.textMuted, border: `1px solid ${colors.border}`, fontSize: 11 }}
             >
-              ред.
+              Редактировать
             </Link>
           )}
         </div>

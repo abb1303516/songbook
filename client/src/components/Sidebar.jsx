@@ -15,8 +15,11 @@ const STATUS_LABELS = { all: 'Все', new: 'Новые', learning: 'Учу', kn
 const THEME_LABELS = { dark: 'Тёмная', light: 'Светлая', contrast: 'Контрастная', warm: 'Тёплая' };
 const COLOR_LABELS = [
   { key: 'text', label: 'Текст' },
+  { key: 'textMuted', label: 'Второстепенный текст' },
   { key: 'chords', label: 'Аккорды' },
   { key: 'bg', label: 'Фон' },
+  { key: 'surface', label: 'Фон sidebar/заголовков' },
+  { key: 'border', label: 'Разделители' },
   { key: 'chorusBg', label: 'Фон припева' },
   { key: 'bridgeBg', label: 'Фон бриджа' },
 ];
