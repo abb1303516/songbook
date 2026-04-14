@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { fetchSetlist } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
+import { useSongControls } from '../context/SongControlsContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import { transposeKey, chordToH } from '../utils/transpose';
 import SongContent from '../components/SongContent';
@@ -14,11 +15,11 @@ export default function SetlistView() {
   const [setlist, setSetlist] = useState(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showControls, setShowControls] = useState(false);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
-  const { settings, getSongSettings, updateSongSettings, updateSettings } = useSettings();
+  const { settings, getSongSettings, updateSongSettings } = useSettings();
   const { isAdmin } = useAdmin();
+  const { registerControls, unregisterControls } = useSongControls();
   const { colors } = settings;
   const autoScroll = useAutoScroll(containerRef);
 
@@ -30,13 +31,8 @@ export default function SetlistView() {
   const songSettings = getSongSettings(song?.id || '');
   const { transpose, fontSize, lineHeight, fitScale } = songSettings;
 
-  // Effective values with fitScale applied
-  const effectiveFontSize = fitScale
-    ? Math.max(Math.round(fontSize * fitScale), 8)
-    : fontSize;
-  const effectiveLineHeight = fitScale
-    ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0)
-    : lineHeight;
+  const effectiveFontSize = fitScale ? Math.max(Math.round(fontSize * fitScale), 8) : fontSize;
+  const effectiveLineHeight = fitScale ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0) : lineHeight;
 
   const goTo = (idx) => {
     setCurrentIdx(idx);
@@ -44,30 +40,23 @@ export default function SetlistView() {
     if (containerRef.current) containerRef.current.scrollTop = 0;
   };
 
-  // Auto-calculate optimal fitScale
   const autoFit = useCallback(() => {
     if (!song) return;
     const container = containerRef.current;
     const content = contentRef.current;
     if (!container || !content) return;
-
     const prevFS = content.style.fontSize;
     const prevLH = content.style.lineHeight;
     content.style.fontSize = `${fontSize}px`;
     content.style.lineHeight = `${lineHeight}`;
-
     const naturalH = content.scrollHeight;
     const naturalW = content.scrollWidth;
-
     content.style.fontSize = prevFS;
     content.style.lineHeight = prevLH;
-
     const availH = container.clientHeight;
     const availW = container.clientWidth;
-
     const scale = Math.min(availH / naturalH, availW / naturalW);
     const clamped = Math.max(Math.min(scale, 2.0), 0.3);
-
     updateSongSettings(song.id, { fitScale: +clamped.toFixed(3) });
   }, [song, fontSize, lineHeight, updateSongSettings]);
 
@@ -83,9 +72,36 @@ export default function SetlistView() {
     updateSongSettings(song.id, { fitScale: null });
   }, [song, updateSongSettings]);
 
+  // Register per-song controls for Sidebar
+  useEffect(() => {
+    if (!song) return;
+    registerControls({
+      songId: song.id,
+      transpose,
+      fontSize,
+      lineHeight,
+      fitScale,
+      scrollOn: autoScroll.on,
+      scrollSpeed: autoScroll.speed,
+      onTranspose: (delta) => updateSongSettings(song.id, { transpose: transpose + delta }),
+      onFontSize: (val) => updateSongSettings(song.id, { fontSize: val }),
+      onLineHeight: (val) => updateSongSettings(song.id, { lineHeight: val }),
+      onAutoFit: autoFit,
+      onFitReset: resetFit,
+      onFitIncrease: () => adjustFit(FIT_STEP),
+      onFitDecrease: () => adjustFit(-FIT_STEP),
+      onScrollToggle: () => autoScroll.setOn(!autoScroll.on),
+      onScrollSpeed: (val) => autoScroll.setSpeed(val),
+    });
+  }, [song, transpose, fontSize, lineHeight, fitScale, autoScroll.on, autoScroll.speed, registerControls, updateSongSettings, autoFit, resetFit, adjustFit]);
+
+  useEffect(() => {
+    return () => unregisterControls();
+  }, [unregisterControls]);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.bg, color: colors.textMuted }}>
+      <div className="flex-1 flex items-center justify-center" style={{ color: colors.textMuted }}>
         Загрузка...
       </div>
     );
@@ -93,7 +109,7 @@ export default function SetlistView() {
 
   if (!setlist) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.bg, color: colors.textMuted }}>
+      <div className="flex-1 flex items-center justify-center" style={{ color: colors.textMuted }}>
         Сет-лист не найден
       </div>
     );
@@ -101,13 +117,8 @@ export default function SetlistView() {
 
   if (!song) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ backgroundColor: colors.bg, color: colors.text }}>
+      <div className="flex-1 flex flex-col">
         <header className="px-4 py-3 flex items-center gap-2" style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}>
-          <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-          </Link>
           <div className="font-semibold">{setlist.name}</div>
         </header>
         <div className="flex-1 flex items-center justify-center" style={{ color: colors.textMuted }}>
@@ -122,18 +133,12 @@ export default function SetlistView() {
   const total = setlist.songs.length;
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
-      {/* Header */}
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
+      {/* Slim title bar with prev/next */}
       <header
         className="flex-shrink-0 px-3 py-2 flex items-center gap-1.5"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </Link>
-
         {/* Prev */}
         <button
           onClick={() => goTo(currentIdx - 1)}
@@ -141,7 +146,7 @@ export default function SetlistView() {
           className="p-1 disabled:opacity-30"
           style={{ color: colors.textMuted }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
 
         <div className="flex-1 min-w-0 text-center">
@@ -159,118 +164,18 @@ export default function SetlistView() {
           className="p-1 disabled:opacity-30"
           style={{ color: colors.textMuted }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
         </button>
 
-        {/* Fit-to-screen 3-part control */}
-        <div className="flex items-center rounded overflow-hidden" style={{ border: `1px solid ${fitScale ? colors.chords : colors.border}` }}>
-          <button
-            onClick={() => adjustFit(-FIT_STEP)}
-            className="px-1.5 py-1 text-xs font-mono"
-            style={{
-              backgroundColor: fitScale ? colors.chords : colors.bg,
-              color: fitScale ? colors.bg : colors.textMuted,
-              borderRight: `1px solid ${fitScale ? 'rgba(255,255,255,0.2)' : colors.border}`,
-            }}
-            title="Уменьшить"
-          >−</button>
-          <button
-            onClick={fitScale ? resetFit : autoFit}
-            className="px-2 py-1 text-xs font-medium"
-            style={{
-              backgroundColor: fitScale ? colors.chords : colors.bg,
-              color: fitScale ? colors.bg : colors.textMuted,
-            }}
-            title={fitScale ? 'Сбросить' : 'Вписать в экран'}
-          >
-            {fitScale ? `${Math.round(fitScale * 100)}%` : 'В экран'}
-          </button>
-          <button
-            onClick={() => adjustFit(FIT_STEP)}
-            className="px-1.5 py-1 text-xs font-mono"
-            style={{
-              backgroundColor: fitScale ? colors.chords : colors.bg,
-              color: fitScale ? colors.bg : colors.textMuted,
-              borderLeft: `1px solid ${fitScale ? 'rgba(255,255,255,0.2)' : colors.border}`,
-            }}
-            title="Увеличить"
-          >+</button>
-        </div>
-
-        {/* Controls toggle */}
-        <button
-          onClick={() => setShowControls(!showControls)}
-          className="p-1.5 rounded"
-          style={{ color: showControls ? colors.chords : colors.textMuted }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
-          </svg>
-        </button>
-
-        {/* Edit button (admin only) */}
         {isAdmin && (
-          <Link to={`/admin/setlists/${id}`} className="p-1.5 rounded" style={{ color: colors.textMuted }} title="Редактировать сет-лист">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          <Link to={`/admin/setlists/${id}`} className="p-1.5 rounded" style={{ color: colors.textMuted }} title="Редактировать">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
           </Link>
         )}
-
-        <Link to="/settings" className="p-1.5 rounded" style={{ color: colors.textMuted }} title="Настройки">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-          </svg>
-        </Link>
       </header>
-
-      {/* Controls */}
-      {showControls && (
-        <div
-          className="flex-shrink-0 px-4 py-3 space-y-3 text-sm"
-          style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
-        >
-          {/* Font size */}
-          <div className="flex items-center gap-2">
-            <span className="w-24" style={{ color: colors.textMuted }}>Шрифт</span>
-            <input type="range" min="10" max="28" value={fontSize} onChange={e => updateSongSettings(song.id, { fontSize: +e.target.value })} className="flex-1" />
-            <span className="w-8 text-center font-mono text-xs">{fontSize}</span>
-          </div>
-
-          {/* Line height */}
-          <div className="flex items-center gap-2">
-            <span className="w-24" style={{ color: colors.textMuted }}>Интервал</span>
-            <input type="range" min="1.0" max="2.0" step="0.1" value={lineHeight} onChange={e => updateSongSettings(song.id, { lineHeight: +e.target.value })} className="flex-1" />
-            <span className="w-8 text-center font-mono text-xs">{lineHeight}</span>
-          </div>
-
-          {/* Toggles */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={() => updateSettings({ showChords: !settings.showChords })}
-              className="px-2.5 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: settings.showChords ? colors.chords : colors.bg,
-                color: settings.showChords ? colors.bg : colors.textMuted,
-                border: `1px solid ${settings.showChords ? colors.chords : colors.border}`,
-              }}
-            >Аккорды</button>
-
-            {/* Auto-scroll */}
-            <button
-              onClick={() => autoScroll.setOn(!autoScroll.on)}
-              className="px-2.5 py-1 rounded text-xs font-medium"
-              style={{
-                backgroundColor: autoScroll.on ? '#4caf50' : colors.bg,
-                color: autoScroll.on ? '#fff' : colors.textMuted,
-                border: `1px solid ${autoScroll.on ? '#4caf50' : colors.border}`,
-              }}
-            >{autoScroll.on ? '⏸' : '▶'} Прокрутка</button>
-          </div>
-        </div>
-      )}
 
       {/* Song content */}
       <div ref={containerRef} className="flex-1 overflow-auto px-4 py-4">

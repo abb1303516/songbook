@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { fetchSong, fetchSongs, createSong, updateSong, deleteSong } from '../api/songs';
+import { useParams, useNavigate } from 'react-router-dom';
+import { fetchSong, createSong, updateSong, deleteSong } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import SongContent from '../components/SongContent';
 
@@ -16,6 +16,7 @@ export default function SongEditor() {
   const [key, setKey] = useState('');
   const [chordpro, setChordpro] = useState('');
   const [tags, setTags] = useState('');
+  const [status, setStatus] = useState('new');
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!isNew);
@@ -28,6 +29,7 @@ export default function SongEditor() {
         setKey(song.key || '');
         setChordpro(song.chordpro || '');
         setTags(song.tags?.join(', ') || '');
+        setStatus(song.status || 'new');
       }).finally(() => setLoading(false));
     }
   }, [id, isNew]);
@@ -42,6 +44,7 @@ export default function SongEditor() {
         key: key.trim(),
         chordpro: chordpro,
         tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        status,
       };
       if (isNew) {
         const song = await createSong(data);
@@ -69,23 +72,18 @@ export default function SongEditor() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: colors.bg, color: colors.textMuted }}>
+      <div className="flex-1 flex items-center justify-center" style={{ color: colors.textMuted }}>
         Загрузка...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.bg, color: colors.text }}>
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       <header
-        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2"
+        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2 flex-shrink-0"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </Link>
         <h1 className="text-lg font-semibold flex-1">{isNew ? 'Новая песня' : 'Редактирование'}</h1>
         <button
           onClick={() => setShowPreview(!showPreview)}
@@ -108,7 +106,7 @@ export default function SongEditor() {
         </button>
       </header>
 
-      <div className="p-4 space-y-3 max-w-2xl mx-auto">
+      <div className="flex-1 overflow-auto p-4 space-y-3 max-w-2xl mx-auto w-full">
         <input
           type="text"
           placeholder="Название *"
@@ -134,6 +132,16 @@ export default function SongEditor() {
             className="w-24 px-3 py-2 rounded-lg outline-none text-sm"
             style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
           />
+          <select
+            value={status}
+            onChange={e => setStatus(e.target.value)}
+            className="px-3 py-2 rounded-lg outline-none text-sm"
+            style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
+          >
+            <option value="new">Новая</option>
+            <option value="learning">Учу</option>
+            <option value="known">Знаю</option>
+          </select>
         </div>
         <input
           type="text"

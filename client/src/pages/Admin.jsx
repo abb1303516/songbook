@@ -15,8 +15,7 @@ export default function Admin() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center"
-           style={{ backgroundColor: colors.bg, color: colors.textMuted }}>
+      <div className="flex-1 flex items-center justify-center" style={{ color: colors.textMuted }}>
         Проверка...
       </div>
     );
@@ -41,8 +40,7 @@ export default function Admin() {
     };
 
     return (
-      <div className="min-h-screen flex items-center justify-center"
-           style={{ backgroundColor: colors.bg, color: colors.text }}>
+      <div className="flex-1 flex items-center justify-center" style={{ color: colors.text }}>
         <form onSubmit={handleLogin} className="w-72 space-y-4">
           <h1 className="text-xl font-bold text-center">Админка</h1>
           <input

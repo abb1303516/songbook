@@ -1,10 +1,9 @@
 import { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { importChordPro } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 
 export default function Import() {
-  const navigate = useNavigate();
   const { settings } = useSettings();
   const { colors } = settings;
   const [text, setText] = useState('');
@@ -37,20 +36,15 @@ export default function Import() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: colors.bg, color: colors.text }}>
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       <header
-        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2"
+        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2 flex-shrink-0"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <Link to="/" className="p-1" style={{ color: colors.textMuted }} title="На главную">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </Link>
         <h1 className="text-lg font-semibold">Импорт ChordPro</h1>
       </header>
 
-      <div className="p-4 space-y-3 max-w-2xl mx-auto">
+      <div className="flex-1 overflow-auto p-4 space-y-3 max-w-2xl mx-auto w-full">
         {result ? (
           <div className="space-y-3">
             <p>Импортировано песен: <strong>{result.count}</strong></p>
