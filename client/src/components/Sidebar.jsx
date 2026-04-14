@@ -431,12 +431,31 @@ export default function Sidebar() {
                           <span className="ml-auto font-mono" style={{ color: colors.textMuted, fontSize: 10 }}>{colors[key]}</span>
                         </button>
                         {activeColor === key && (
-                          <div className="mt-1 flex justify-center" style={{ maxWidth: '100%' }}>
-                            <HexColorPicker
-                              color={colors[key]?.startsWith('rgba') ? '#888888' : colors[key]}
-                              onChange={(c) => saveThemeColor(key, c)}
-                              style={{ width: '100%', maxWidth: 220 }}
+                          <div className="mt-1 space-y-1">
+                            <input
+                              type="text"
+                              value={colors[key] || ''}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                if (/^#[0-9a-fA-F]{0,6}$/.test(v) || v === '') {
+                                  saveThemeColor(key, v);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const v = e.target.value;
+                                if (/^#[0-9a-fA-F]{6}$/.test(v)) saveThemeColor(key, v);
+                              }}
+                              placeholder="#000000"
+                              className="w-full px-2 py-1 rounded text-xs font-mono outline-none"
+                              style={{ backgroundColor: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
                             />
+                            <div className="flex justify-center" style={{ maxWidth: '100%' }}>
+                              <HexColorPicker
+                                color={colors[key]?.startsWith('rgba') ? '#888888' : (colors[key]?.startsWith('#') ? colors[key] : '#888888')}
+                                onChange={(c) => saveThemeColor(key, c)}
+                                style={{ width: '100%', maxWidth: 220 }}
+                              />
+                            </div>
                           </div>
                         )}
                       </div>
