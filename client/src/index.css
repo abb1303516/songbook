@@ -33,9 +33,3 @@ aside * {
   scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
 }
 
-/* Resizable table columns */
-table th[data-resizable] {
-  resize: horizontal;
-  overflow: hidden;
-  min-width: 60px;
-}

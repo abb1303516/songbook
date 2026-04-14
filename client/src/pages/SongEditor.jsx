@@ -15,7 +15,6 @@ export default function SongEditor() {
   const [artist, setArtist] = useState('');
   const [key, setKey] = useState('');
   const [chordpro, setChordpro] = useState('');
-  const [tags, setTags] = useState('');
   const [status, setStatus] = useState('new');
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -28,7 +27,6 @@ export default function SongEditor() {
         setArtist(song.artist || '');
         setKey(song.key || '');
         setChordpro(song.chordpro || '');
-        setTags(song.tags?.join(', ') || '');
         setStatus(song.status || 'new');
       }).finally(() => setLoading(false));
     }
@@ -43,7 +41,6 @@ export default function SongEditor() {
         artist: artist.trim(),
         key: key.trim(),
         chordpro: chordpro,
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
         status,
       };
       if (isNew) {
@@ -125,15 +122,6 @@ export default function SongEditor() {
             <option value="known">Знаю</option>
           </select>
         </div>
-        <input
-          type="text"
-          placeholder="Теги (через запятую)"
-          value={tags}
-          onChange={e => setTags(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg outline-none text-sm"
-          style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
-        />
-
         {/* Action buttons */}
         <div className="flex items-center gap-2">
           <button
@@ -178,8 +166,8 @@ export default function SongEditor() {
             placeholder="Текст в формате ChordPro&#10;&#10;{sov}&#10;[Am]Текст песни [C]с аккордами&#10;{eov}&#10;&#10;{soc: Припев}&#10;[Dm]Припев [G]здесь&#10;{eoc}"
             value={chordpro}
             onChange={e => setChordpro(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg outline-none text-sm font-mono min-h-[400px] resize-y"
-            style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
+            className="w-full px-3 py-2 rounded-lg outline-none text-sm font-mono resize-none"
+            style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}`, minHeight: 'calc(100vh - 280px)' }}
           />
         )}
 

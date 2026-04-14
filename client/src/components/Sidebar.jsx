@@ -306,16 +306,31 @@ export default function Sidebar() {
           {setlistsOpen && (
             <div className="mt-1.5 space-y-0.5 max-h-48 overflow-y-auto">
               {setlists.map(sl => (
-                <Link
-                  key={sl.id}
-                  to={`/setlist/${sl.id}`}
-                  onClick={handleNavClick}
-                  className="flex items-center justify-between w-full px-2 py-1 rounded text-xs"
-                  style={{ color: colors.textMuted }}
-                >
-                  <span className="truncate">{sl.name}</span>
-                  <span>{sl.song_ids?.length || 0}</span>
-                </Link>
+                <div key={sl.id} className="flex items-center gap-1 px-2 py-1 rounded text-xs group">
+                  <Link
+                    to={`/setlist/${sl.id}`}
+                    onClick={handleNavClick}
+                    className="flex-1 truncate"
+                    style={{ color: colors.textMuted }}
+                  >
+                    {sl.name}
+                  </Link>
+                  <span className="flex-shrink-0" style={{ color: colors.textMuted }}>{sl.song_ids?.length || 0}</span>
+                  {isAdmin && (
+                    <Link
+                      to={`/admin/setlists/${sl.id}`}
+                      onClick={handleNavClick}
+                      className="flex-shrink-0 opacity-0 group-hover:opacity-60"
+                      style={{ color: colors.textMuted }}
+                      title="Редактировать"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </Link>
+                  )}
+                </div>
               ))}
               {setlists.length === 0 && (
                 <div className="text-xs px-2 py-1" style={{ color: colors.textMuted }}>Пусто</div>

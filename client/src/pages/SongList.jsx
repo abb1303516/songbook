@@ -132,10 +132,10 @@ export default function SongList() {
           </colgroup>
           <thead className="sticky top-0 z-10">
             <tr>
-              <th data-resizable className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('title')}>
+              <th className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('title')}>
                 Песня{sortArrow('title')}
               </th>
-              <th data-resizable className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('artist')}>
+              <th className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('artist')}>
                 Исполнитель{sortArrow('artist')}
               </th>
               <th className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('key')}>
@@ -190,8 +190,8 @@ export default function SongList() {
                     {menuOpen === song.id && (
                       <div
                         ref={menuRef}
-                        className="absolute right-0 top-8 z-50 rounded-lg shadow-lg py-1 min-w-[160px]"
-                        style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}
+                        className="absolute right-0 top-8 z-50 rounded-lg shadow-xl py-1 min-w-[160px]"
+                        style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}`, boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
                       >
                         {isAdmin && (
                           <Link

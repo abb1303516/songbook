@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { fetchSong } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
+import { useAdmin } from '../context/AdminContext';
 import { useSongControls } from '../context/SongControlsContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import { transposeKey, chordToH } from '../utils/transpose';
@@ -16,6 +17,7 @@ export default function SongView() {
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const { settings, getSongSettings, updateSongSettings } = useSettings();
+  const { isAdmin } = useAdmin();
   const { registerControls, unregisterControls } = useSongControls();
   const { colors } = settings;
   const autoScroll = useAutoScroll(containerRef);
@@ -112,10 +114,19 @@ export default function SongView() {
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         <div className="flex-1 min-w-0">
-          <div className="font-semibold truncate text-base">{song.title}</div>
+          <div className="font-semibold truncate text-lg">{song.title}</div>
           <div className="text-sm truncate" style={{ color: colors.textMuted }}>
             {song.artist}
             {currentKey && <span className="ml-2" style={{ color: colors.chords }}>{currentKey}</span>}
+            {isAdmin && (
+              <Link
+                to={`/admin/songs/${id}`}
+                className="ml-3 text-xs"
+                style={{ color: colors.chords, opacity: 0.7 }}
+              >
+                Редактировать
+              </Link>
+            )}
           </div>
         </div>
 

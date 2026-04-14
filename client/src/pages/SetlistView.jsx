@@ -136,24 +136,25 @@ export default function SetlistView() {
     <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       {/* Slim title bar with prev/next */}
       <header
-        className="flex-shrink-0 px-3 py-2 flex items-center gap-1.5"
+        className="flex-shrink-0 px-4 py-3 flex items-center gap-3"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         {/* Prev */}
         <button
           onClick={() => goTo(currentIdx - 1)}
           disabled={currentIdx === 0}
-          className="p-1 disabled:opacity-30"
-          style={{ color: colors.textMuted }}
+          className="p-2 rounded disabled:opacity-30 cursor-pointer"
+          style={{ color: colors.text, border: `1px solid ${colors.border}` }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
 
-        <div className="flex-1 min-w-0 text-center">
-          <div className="font-semibold truncate text-sm">{song.title}</div>
-          <div className="text-xs" style={{ color: colors.textMuted }}>
-            {setlist.name} — {currentIdx + 1}/{total}
+        <div className="min-w-0">
+          <div className="font-semibold truncate text-lg">{song.title}</div>
+          <div className="text-sm" style={{ color: colors.textMuted }}>
+            {song.artist}
             {currentKey && <span className="ml-2" style={{ color: colors.chords }}>{currentKey}</span>}
+            <span className="ml-3">{setlist.name} — {currentIdx + 1}/{total}</span>
           </div>
         </div>
 
@@ -161,10 +162,10 @@ export default function SetlistView() {
         <button
           onClick={() => goTo(currentIdx + 1)}
           disabled={currentIdx === total - 1}
-          className="p-1 disabled:opacity-30"
-          style={{ color: colors.textMuted }}
+          className="p-2 rounded disabled:opacity-30 cursor-pointer"
+          style={{ color: colors.text, border: `1px solid ${colors.border}` }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
         </button>
 
       </header>
