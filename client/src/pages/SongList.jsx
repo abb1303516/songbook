@@ -172,9 +172,22 @@ export default function SongList() {
                   <td className="px-4 py-2.5 truncate" style={{ color: colors.textMuted }}>{song.artist}</td>
                   <td className="px-3 py-2.5 font-mono text-xs" style={{ color: colors.chords }}>{displayKey}</td>
                   <td className="px-3 py-2.5">
-                    <span className="text-xs" style={{ color: colors.textMuted }}>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const cycle = ['new', 'learning', 'known'];
+                        const next = cycle[(cycle.indexOf(status) + 1) % cycle.length];
+                        try {
+                          await updateSong(song.id, { status: next });
+                          reload();
+                        } catch (err) { /* ignore */ }
+                      }}
+                      className="text-xs cursor-pointer px-1.5 py-0.5 rounded"
+                      style={{ color: colors.textMuted, border: `1px solid ${colors.border}` }}
+                      title="Нажмите для смены статуса"
+                    >
                       {STATUS_LABELS[status] || status}
-                    </span>
+                    </button>
                   </td>
                   <td className="px-3 py-2.5 text-xs" style={{ color: colors.textMuted }}>{date}</td>
                   <td className="px-1 py-2.5 relative">

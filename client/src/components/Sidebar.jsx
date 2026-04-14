@@ -18,6 +18,7 @@ const COLOR_LABELS = [
   { key: 'chords', label: 'Аккорды' },
   { key: 'bg', label: 'Фон' },
   { key: 'chorusBg', label: 'Фон припева' },
+  { key: 'bridgeBg', label: 'Фон бриджа' },
 ];
 
 // --- Icons as small components ---
