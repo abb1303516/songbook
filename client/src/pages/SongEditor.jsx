@@ -80,33 +80,15 @@ export default function SongEditor() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
+      {/* Header — just title */}
       <header
-        className="sticky top-0 z-10 px-4 py-2 flex items-center gap-2 flex-shrink-0"
+        className="flex-shrink-0 px-4 py-2 flex items-center"
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
-        <h1 className="text-lg font-semibold flex-1">{isNew ? 'Новая песня' : 'Редактирование'}</h1>
-        <button
-          onClick={() => setShowPreview(!showPreview)}
-          className="px-2.5 py-1 rounded text-xs font-medium"
-          style={{
-            backgroundColor: showPreview ? colors.chords : colors.bg,
-            color: showPreview ? colors.bg : colors.textMuted,
-            border: `1px solid ${showPreview ? colors.chords : colors.border}`,
-          }}
-        >
-          Превью
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={saving || !title.trim()}
-          className="px-3 py-1 rounded text-sm font-medium disabled:opacity-50"
-          style={{ backgroundColor: colors.chords, color: colors.bg }}
-        >
-          {saving ? '...' : 'Сохранить'}
-        </button>
+        <h1 className="text-base font-semibold">{isNew ? 'Новая песня' : 'Редактирование песни'}</h1>
       </header>
 
-      <div className="flex-1 overflow-auto p-4 space-y-3 max-w-2xl mx-auto w-full">
+      <div className="flex-1 overflow-auto p-4 space-y-3 max-w-2xl w-full">
         <input
           type="text"
           placeholder="Название *"
@@ -151,6 +133,29 @@ export default function SongEditor() {
           className="w-full px-3 py-2 rounded-lg outline-none text-sm"
           style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
         />
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSave}
+            disabled={saving || !title.trim()}
+            className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+            style={{ backgroundColor: colors.chords, color: colors.bg }}
+          >
+            {saving ? '...' : 'Сохранить'}
+          </button>
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            className="px-3 py-2 rounded-lg text-sm font-medium"
+            style={{
+              backgroundColor: showPreview ? colors.chords : colors.bg,
+              color: showPreview ? colors.bg : colors.textMuted,
+              border: `1px solid ${showPreview ? colors.chords : colors.border}`,
+            }}
+          >
+            {showPreview ? 'Редактор' : 'Превью'}
+          </button>
+        </div>
 
         {showPreview ? (
           <div

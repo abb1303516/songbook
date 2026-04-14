@@ -264,6 +264,17 @@ export default function Sidebar() {
           </button>
           {artistsOpen && (
             <div className="mt-1.5 space-y-0.5 max-h-48 overflow-y-auto">
+              <button
+                onClick={() => { setSelectedArtist(null); const p = new URLSearchParams(location.search); p.delete('artist'); const qs = p.toString(); navigate(`/${qs ? '?' + qs : ''}`, { replace: true }); }}
+                className="flex items-center justify-between w-full px-2 py-1 rounded text-xs"
+                style={{
+                  backgroundColor: !selectedArtist ? colors.chords : 'transparent',
+                  color: !selectedArtist ? colors.bg : colors.textMuted,
+                }}
+              >
+                <span>Все исполнители</span>
+                <span>{songs.length}</span>
+              </button>
               {artists.map(([name, count]) => (
                 <button
                   key={name}

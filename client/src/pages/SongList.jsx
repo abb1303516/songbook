@@ -1,20 +1,33 @@
-import { useState, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongsContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
+import { updateSong, updateSetlist } from '../api/songs';
 import { chordToH, transposeKey } from '../utils/transpose';
 
 const STATUS_LABELS = { new: 'Новые', learning: 'Учу', known: 'Знаю' };
 
 export default function SongList() {
-  const { songs, setlists, loading } = useSongs();
+  const { songs, setlists, loading, reload } = useSongs();
   const { settings, getSongSettings } = useSettings();
   const { colors } = settings;
   const { isAdmin } = useAdmin();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [sortCol, setSortCol] = useState('title');
   const [sortAsc, setSortAsc] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(null); // song id or null
+  const menuRef = useRef(null);
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(null);
+    };
+    if (menuOpen) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
 
   // Read filters from URL (set by Sidebar)
   const qFilter = searchParams.get('q') || '';
@@ -56,10 +69,17 @@ export default function SongList() {
   };
 
   const activeFilters = [
-    artistFilter && `${artistFilter}`,
-    statusFilter && STATUS_LABELS[statusFilter],
-    qFilter && `"${qFilter}"`,
+    artistFilter && { label: artistFilter, param: 'artist' },
+    statusFilter && { label: STATUS_LABELS[statusFilter], param: 'status' },
+    qFilter && { label: `"${qFilter}"`, param: 'q' },
   ].filter(Boolean);
+
+  const removeFilter = (param) => {
+    const params = new URLSearchParams(searchParams);
+    params.delete(param);
+    const qs = params.toString();
+    navigate(`/${qs ? '?' + qs : ''}`, { replace: true });
+  };
 
   const sortArrow = (col) => sortCol === col ? (sortAsc ? ' ↑' : ' ↓') : '';
 
@@ -81,14 +101,21 @@ export default function SongList() {
     <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
       {/* Active filters indicator */}
       {activeFilters.length > 0 && (
-        <div className="flex items-center gap-2 px-4 py-2 text-sm flex-shrink-0" style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}>
-          <span style={{ color: colors.textMuted }}>Фильтр:</span>
-          {activeFilters.map((f, i) => (
-            <span key={i} className="px-2 py-0.5 rounded-full text-xs" style={{ backgroundColor: colors.chords, color: colors.bg }}>
-              {f}
-            </span>
+        <div className="flex items-center gap-2 px-4 py-1.5 text-sm flex-shrink-0" style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}>
+          {activeFilters.map((f) => (
+            <button
+              key={f.param}
+              onClick={() => removeFilter(f.param)}
+              className="group flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer"
+              style={{ backgroundColor: colors.chords, color: colors.bg }}
+              title="Убрать фильтр"
+            >
+              {f.label}
+              <svg className="opacity-50 group-hover:opacity-100" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           ))}
-          <Link to="/" className="text-xs ml-auto" style={{ color: colors.textMuted }}>Сбросить</Link>
         </div>
       )}
 
@@ -100,8 +127,8 @@ export default function SongList() {
             <col style={{ width: '25%' }} />
             <col style={{ width: '10%' }} />
             <col style={{ width: '12%' }} />
-            <col style={{ width: '14%' }} />
-            {isAdmin && <col style={{ width: '4%' }} />}
+            <col style={{ width: '13%' }} />
+            <col style={{ width: '36px' }} />
           </colgroup>
           <thead className="sticky top-0 z-10">
             <tr>
@@ -120,7 +147,7 @@ export default function SongList() {
               <th className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('created_at')}>
                 Добавлена{sortArrow('created_at')}
               </th>
-              {isAdmin && <th style={thStyle}></th>}
+              <th style={thStyle}></th>
             </tr>
           </thead>
           <tbody>
@@ -150,16 +177,59 @@ export default function SongList() {
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-xs" style={{ color: colors.textMuted }}>{date}</td>
-                  {isAdmin && (
-                    <td className="px-2 py-2.5">
-                      <Link to={`/admin/songs/${song.id}`} style={{ color: colors.textMuted }} title="Редактировать">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                      </Link>
-                    </td>
-                  )}
+                  <td className="px-1 py-2.5 relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === song.id ? null : song.id); }}
+                      className="p-1 rounded cursor-pointer"
+                      style={{ color: colors.textMuted }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" />
+                      </svg>
+                    </button>
+                    {menuOpen === song.id && (
+                      <div
+                        ref={menuRef}
+                        className="absolute right-0 top-8 z-50 rounded-lg shadow-lg py-1 min-w-[160px]"
+                        style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}
+                      >
+                        {isAdmin && (
+                          <Link
+                            to={`/admin/songs/${song.id}`}
+                            className="block px-3 py-1.5 text-xs hover:opacity-80"
+                            style={{ color: colors.text }}
+                            onClick={() => setMenuOpen(null)}
+                          >
+                            Редактировать
+                          </Link>
+                        )}
+                        {setlists.length > 0 && (
+                          <>
+                            <div className="px-3 py-1 text-xs" style={{ color: colors.textMuted }}>Добавить в сет-лист:</div>
+                            {setlists.map(sl => (
+                              <button
+                                key={sl.id}
+                                className="block w-full text-left px-3 py-1.5 text-xs hover:opacity-80"
+                                style={{ color: colors.chords }}
+                                onClick={async () => {
+                                  const ids = sl.song_ids || [];
+                                  if (!ids.includes(song.id)) {
+                                    try {
+                                      await updateSetlist(sl.id, { song_ids: [...ids, song.id] });
+                                      reload();
+                                    } catch (e) { alert(e.message); }
+                                  }
+                                  setMenuOpen(null);
+                                }}
+                              >
+                                {sl.name} {(sl.song_ids || []).includes(song.id) ? '✓' : ''}
+                              </button>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               );
             })}
