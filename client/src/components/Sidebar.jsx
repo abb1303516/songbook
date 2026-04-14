@@ -109,12 +109,10 @@ export default function Sidebar() {
       else params.set('status', value);
     }
     if (type === 'artist') {
-      setSelectedArtist(prev => {
-        const next = prev === value ? null : value;
-        if (next) params.set('artist', next);
-        else params.delete('artist');
-        return next;
-      });
+      const next = selectedArtist === value ? null : value;
+      setSelectedArtist(next);
+      if (next) params.set('artist', next);
+      else params.delete('artist');
     }
     if (type === 'search') {
       setSearchQuery(value);
@@ -133,9 +131,11 @@ export default function Sidebar() {
   const iconBtn = (title, icon, onClick) => (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-center py-2.5"
+      className="w-full flex items-center justify-center py-2.5 cursor-pointer transition-colors"
       style={{ color: colors.textMuted }}
       title={title}
+      onMouseEnter={e => { e.currentTarget.style.backgroundColor = colors.border; e.currentTarget.style.color = colors.text; }}
+      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = colors.textMuted; }}
     >
       {icon}
     </button>
@@ -308,6 +308,16 @@ export default function Sidebar() {
               ))}
               {setlists.length === 0 && (
                 <div className="text-xs px-2 py-1" style={{ color: colors.textMuted }}>Пусто</div>
+              )}
+              {isAdmin && (
+                <Link
+                  to="/admin/setlists/new"
+                  onClick={handleNavClick}
+                  className="flex items-center gap-1 px-2 py-1 rounded text-xs mt-1"
+                  style={{ color: colors.chords }}
+                >
+                  <IconPlus /> Новый сет-лист
+                </Link>
               )}
             </div>
           )}

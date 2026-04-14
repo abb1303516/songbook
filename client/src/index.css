@@ -3,10 +3,39 @@
 body {
   margin: 0;
   font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Sidebar scrollbar styling */
+aside ::-webkit-scrollbar {
+  width: 6px;
+}
+aside ::-webkit-scrollbar-track {
+  background: transparent;
+}
+aside ::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 3px;
+}
+aside ::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+/* Firefox scrollbar */
+aside * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
+}
+
+/* Resizable table columns */
+table th[data-resizable] {
+  resize: horizontal;
+  overflow: hidden;
+  min-width: 60px;
 }

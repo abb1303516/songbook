@@ -94,35 +94,33 @@ export default function SongList() {
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
+        <table className="w-full text-sm" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '35%' }} />
+            <col style={{ width: '25%' }} />
+            <col style={{ width: '10%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '14%' }} />
+            {isAdmin && <col style={{ width: '4%' }} />}
+          </colgroup>
           <thead className="sticky top-0 z-10">
             <tr>
-              <th
-                className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs"
-                style={thStyle}
-                onClick={() => handleSort('title')}
-              >Песня{sortArrow('title')}</th>
-              <th
-                className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs"
-                style={thStyle}
-                onClick={() => handleSort('artist')}
-              >Исполнитель{sortArrow('artist')}</th>
-              <th
-                className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs w-16"
-                style={thStyle}
-                onClick={() => handleSort('key')}
-              >Тон{sortArrow('key')}</th>
-              <th
-                className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs w-20"
-                style={thStyle}
-                onClick={() => handleSort('status')}
-              >Статус{sortArrow('status')}</th>
-              <th
-                className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs w-24"
-                style={thStyle}
-                onClick={() => handleSort('created_at')}
-              >Добавлена{sortArrow('created_at')}</th>
-              {isAdmin && <th className="w-10" style={thStyle}></th>}
+              <th data-resizable className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('title')}>
+                Песня{sortArrow('title')}
+              </th>
+              <th data-resizable className="text-left px-4 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('artist')}>
+                Исполнитель{sortArrow('artist')}
+              </th>
+              <th className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('key')}>
+                Тон{sortArrow('key')}
+              </th>
+              <th className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('status')}>
+                Статус{sortArrow('status')}
+              </th>
+              <th className="text-left px-3 py-2 font-semibold cursor-pointer select-none text-xs" style={thStyle} onClick={() => handleSort('created_at')}>
+                Добавлена{sortArrow('created_at')}
+              </th>
+              {isAdmin && <th style={thStyle}></th>}
             </tr>
           </thead>
           <tbody>
@@ -139,12 +137,12 @@ export default function SongList() {
                   className="hover:opacity-80 transition-colors cursor-pointer"
                   style={{ borderBottom: `1px solid ${colors.border}` }}
                 >
-                  <td className="px-4 py-2.5">
+                  <td className="px-4 py-2.5 truncate">
                     <Link to={`/song/${song.id}`} className="font-medium hover:underline" style={{ color: colors.text }}>
                       {song.title}
                     </Link>
                   </td>
-                  <td className="px-4 py-2.5" style={{ color: colors.textMuted }}>{song.artist}</td>
+                  <td className="px-4 py-2.5 truncate" style={{ color: colors.textMuted }}>{song.artist}</td>
                   <td className="px-3 py-2.5 font-mono text-xs" style={{ color: colors.chords }}>{displayKey}</td>
                   <td className="px-3 py-2.5">
                     <span className="text-xs" style={{ color: colors.textMuted }}>

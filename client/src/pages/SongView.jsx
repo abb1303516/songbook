@@ -114,8 +114,8 @@ export default function SongView() {
         style={{ backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}
       >
         <div className="flex-1 min-w-0">
-          <div className="font-semibold truncate text-sm">{song.title}</div>
-          <div className="text-xs truncate" style={{ color: colors.textMuted }}>
+          <div className="font-semibold truncate text-base">{song.title}</div>
+          <div className="text-sm truncate" style={{ color: colors.textMuted }}>
             {song.artist}
             {currentKey && <span className="ml-2" style={{ color: colors.chords }}>{currentKey}</span>}
           </div>
