@@ -74,7 +74,7 @@ export default function Sidebar() {
   const { isOpen, isMobile, toggle, close } = useSidebar();
   const { songs, setlists } = useSongs();
   const { controls } = useSongControls();
-  const { settings, updateSettings, applyTheme } = useSettings();
+  const { settings, updateSettings, applyTheme, saveThemeColor, resetTheme } = useSettings();
   const { isAdmin } = useAdmin();
   const { colors } = settings;
   const location = useLocation();
@@ -430,7 +430,7 @@ export default function Sidebar() {
                           <div className="mt-1 flex justify-center" style={{ maxWidth: '100%' }}>
                             <HexColorPicker
                               color={colors[key]?.startsWith('rgba') ? '#888888' : colors[key]}
-                              onChange={(c) => updateSettings({ colors: { ...colors, [key]: c }, theme: 'custom' })}
+                              onChange={(c) => saveThemeColor(key, c)}
                               style={{ width: '100%', maxWidth: 220 }}
                             />
                           </div>
@@ -440,6 +440,17 @@ export default function Sidebar() {
                   </div>
                 )}
               </div>
+
+              {/* Reset theme */}
+              {settings.customThemes?.[settings.theme] && (
+                <button
+                  onClick={resetTheme}
+                  className="text-xs px-2 py-1 rounded"
+                  style={{ color: colors.textMuted, border: `1px solid ${colors.border}` }}
+                >
+                  Сбросить цвета темы
+                </button>
+              )}
 
               {/* Display settings */}
               <div>

@@ -117,17 +117,16 @@ export default function SongView() {
           <div className="font-semibold truncate text-lg">{song.title}</div>
           <div className="text-sm truncate" style={{ color: colors.textMuted }}>
             {song.artist}
-            {currentKey && <span className="ml-2" style={{ color: colors.chords }}>{currentKey}</span>}
-            {isAdmin && (
-              <Link
-                to={`/admin/songs/${id}`}
-                className="ml-3 text-xs"
-                style={{ color: colors.chords, opacity: 0.7 }}
-              >
-                Редактировать
-              </Link>
-            )}
           </div>
+          {isAdmin && (
+            <Link
+              to={`/admin/songs/${id}`}
+              className="inline-block mt-1 px-2 py-0.5 rounded text-xs"
+              style={{ color: colors.textMuted, border: `1px solid ${colors.border}` }}
+            >
+              Редактировать
+            </Link>
+          )}
         </div>
 
       </header>

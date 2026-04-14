@@ -56,6 +56,7 @@ const THEMES = {
 const DEFAULT_SETTINGS = {
   theme: 'dark',
   colors: { ...THEMES.dark },
+  customThemes: {}, // { dark: { chords: '#ff0000' }, ... } — user overrides per theme
   mono: false,
   chordSizeOffset: 0,
   showChords: true,
@@ -110,11 +111,31 @@ export function useLocalSettings() {
   const applyTheme = useCallback((themeName) => {
     const themeColors = THEMES[themeName];
     if (themeColors) {
-      updateSettings({ theme: themeName, colors: { ...themeColors } });
+      const overrides = settings.customThemes?.[themeName] || {};
+      updateSettings({ theme: themeName, colors: { ...themeColors, ...overrides } });
     }
-  }, [updateSettings]);
+  }, [updateSettings, settings.customThemes]);
 
-  return { settings, updateSettings, getSongSettings, updateSongSettings, applyTheme };
+  const saveThemeColor = useCallback((colorKey, colorValue) => {
+    const themeName = settings.theme;
+    const customThemes = { ...settings.customThemes };
+    customThemes[themeName] = { ...customThemes[themeName], [colorKey]: colorValue };
+    updateSettings({
+      customThemes,
+      colors: { ...settings.colors, [colorKey]: colorValue },
+    });
+  }, [updateSettings, settings]);
+
+  const resetTheme = useCallback(() => {
+    const themeName = settings.theme;
+    const base = THEMES[themeName];
+    if (!base) return;
+    const customThemes = { ...settings.customThemes };
+    delete customThemes[themeName];
+    updateSettings({ customThemes, colors: { ...base } });
+  }, [updateSettings, settings]);
+
+  return { settings, updateSettings, getSongSettings, updateSongSettings, applyTheme, saveThemeColor, resetTheme };
 }
 
 export { THEMES };

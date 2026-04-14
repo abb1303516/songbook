@@ -143,18 +143,19 @@ export default function SetlistView() {
         <button
           onClick={() => goTo(currentIdx - 1)}
           disabled={currentIdx === 0}
-          className="p-2 rounded disabled:opacity-30 cursor-pointer"
+          className="p-2 rounded disabled:opacity-30 cursor-pointer flex-shrink-0"
           style={{ color: colors.text, border: `1px solid ${colors.border}` }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
 
-        <div className="min-w-0">
+        <div className="overflow-hidden" style={{ width: 'min(400px, 50vw)' }}>
           <div className="font-semibold truncate text-lg">{song.title}</div>
-          <div className="text-sm" style={{ color: colors.textMuted }}>
+          <div className="text-sm truncate" style={{ color: colors.textMuted }}>
             {song.artist}
-            {currentKey && <span className="ml-2" style={{ color: colors.chords }}>{currentKey}</span>}
-            <span className="ml-3">{setlist.name} — {currentIdx + 1}/{total}</span>
+          </div>
+          <div className="text-xs mt-0.5" style={{ color: colors.textMuted }}>
+            {setlist.name} — {currentIdx + 1}/{total}
           </div>
         </div>
 
@@ -162,7 +163,7 @@ export default function SetlistView() {
         <button
           onClick={() => goTo(currentIdx + 1)}
           disabled={currentIdx === total - 1}
-          className="p-2 rounded disabled:opacity-30 cursor-pointer"
+          className="p-2 rounded disabled:opacity-30 cursor-pointer flex-shrink-0"
           style={{ color: colors.text, border: `1px solid ${colors.border}` }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
