@@ -179,33 +179,43 @@ export default function SongView() {
 
       {/* Song content with gallery arrows */}
       <div ref={containerRef} className="flex-1 overflow-auto relative">
-        {/* Left arrow */}
+        {/* Left arrow — click zone full height, circle button in center */}
         {hasPrev && (
           <div
-            className="absolute left-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer transition-opacity"
-            style={{ opacity: hoverLeft ? 1 : 0, background: `linear-gradient(to right, ${colors.surface}ee, ${colors.surface}88, transparent)` }}
+            className="absolute left-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer"
+            style={{ opacity: hoverLeft ? 1 : 0, transition: 'opacity 0.15s' }}
             onMouseEnter={() => setHoverLeft(true)}
             onMouseLeave={() => setHoverLeft(false)}
             onClick={() => goTo(currentIdx - 1)}
           >
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </div>
           </div>
         )}
 
         {/* Right arrow */}
         {hasNext && (
           <div
-            className="absolute right-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer transition-opacity"
-            style={{ opacity: hoverRight ? 1 : 0, background: `linear-gradient(to left, ${colors.surface}ee, ${colors.surface}88, transparent)` }}
+            className="absolute right-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer"
+            style={{ opacity: hoverRight ? 1 : 0, transition: 'opacity 0.15s' }}
             onMouseEnter={() => setHoverRight(true)}
             onMouseLeave={() => setHoverRight(false)}
             onClick={() => goTo(currentIdx + 1)}
           >
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
           </div>
         )}
 
