@@ -183,7 +183,7 @@ export default function SongView() {
         {/* Left arrow — uses CSS hover, positioned outside scroll container */}
         {hasPrev && (
           <div
-            className="gallery-arrow absolute left-0 top-0 bottom-0 w-14 z-10 flex items-center justify-center cursor-pointer"
+            className="gallery-arrow absolute left-0 top-0 bottom-0 w-32 z-10 flex items-center justify-center cursor-pointer"
             onClick={() => goTo(currentIdx - 1)}
           >
             <div
@@ -200,7 +200,7 @@ export default function SongView() {
         {/* Right arrow */}
         {hasNext && (
           <div
-            className="gallery-arrow absolute right-0 top-0 bottom-0 w-14 z-10 flex items-center justify-center cursor-pointer"
+            className="gallery-arrow absolute right-0 top-0 bottom-0 w-32 z-10 flex items-center justify-center cursor-pointer"
             onClick={() => goTo(currentIdx + 1)}
           >
             <div
