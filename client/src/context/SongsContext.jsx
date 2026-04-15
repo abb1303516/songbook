@@ -2,13 +2,25 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { fetchSongs, fetchSetlists } from '../api/songs';
 
 const SongsContext = createContext(null);
+const NAV_KEY = 'songbook-navlist';
+
+function loadNavList() {
+  try {
+    const raw = sessionStorage.getItem(NAV_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
 
 export function SongsProvider({ children }) {
   const [songs, setSongs] = useState([]);
   const [setlists, setSetlists] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Navigation context: ordered list of song IDs for prev/next in SongView
-  const [navList, setNavList] = useState([]);
+  const [navList, setNavListState] = useState(loadNavList);
+
+  const setNavList = useCallback((list) => {
+    setNavListState(list);
+    try { sessionStorage.setItem(NAV_KEY, JSON.stringify(list)); } catch {}
+  }, []);
 
   const reload = useCallback(() => {
     setLoading(true);
