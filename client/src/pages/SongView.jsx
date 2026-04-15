@@ -40,15 +40,17 @@ export default function SongView() {
     fetchSong(id).then(setSong).finally(() => setLoading(false));
   }, [id]);
 
-  // If coming from setlist, populate navList with setlist songs
+  // Populate navList: from setlist, or from all songs if empty
   const setlistId = searchParams.get('setlist');
   useEffect(() => {
     if (setlistId) {
       fetchSetlist(setlistId).then(sl => {
         if (sl?.songs) setNavList(sl.songs.map(s => s.id));
       }).catch(() => {});
+    } else if (navList.length === 0 && songs.length > 0) {
+      setNavList(songs.map(s => s.id));
     }
-  }, [setlistId, setNavList]);
+  }, [setlistId, setNavList, navList.length, songs]);
 
   // Navigation
   const currentIdx = navList.indexOf(id);
