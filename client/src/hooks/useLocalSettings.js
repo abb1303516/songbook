@@ -54,9 +54,8 @@ const THEMES = {
   },
 };
 
-// Server-synced settings defaults
+// Server-synced settings defaults (customThemes synced, theme is per-device)
 const SERVER_DEFAULTS = {
-  theme: 'dark',
   customThemes: {},
   fontSize: 16,
   lineHeight: 1.4,
@@ -91,38 +90,43 @@ export function useLocalSettings() {
   const [loaded, setLoaded] = useState(false);
   const saveTimer = useRef(null);
 
-  // Per-device settings (localStorage)
-  const [localSettings, setLocalSettings] = useState(loadLocal);
+  // Per-device settings (localStorage): theme choice, fitScale, sidebar
+  const [localSettings, setLocalSettings] = useState(() => {
+    const saved = loadLocal();
+    return { theme: 'dark', ...saved };
+  });
 
   // Fetch from server on mount
   useEffect(() => {
     fetchSettings()
       .then(data => {
-        if (data && typeof data === 'object' && data.theme) {
-          setServerSettings({ ...SERVER_DEFAULTS, ...data });
+        if (data && typeof data === 'object') {
+          const { theme, ...serverData } = data; // theme ignored from server, it's per-device
+          setServerSettings({ ...SERVER_DEFAULTS, ...serverData });
         }
       })
       .catch(() => { /* use defaults */ })
       .finally(() => setLoaded(true));
   }, []);
 
-  // Debounced save to server
+  // Debounced save to server (theme NOT included — it's per-device)
   const saveToServer = useCallback((newSettings) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      const { theme, customThemes, fontSize, lineHeight, showChords, useH } = newSettings;
-      saveSettingsApi({ theme, customThemes, fontSize, lineHeight, showChords, useH }).catch(() => {});
+      const { customThemes, fontSize, lineHeight, showChords, useH } = newSettings;
+      saveSettingsApi({ customThemes, fontSize, lineHeight, showChords, useH }).catch(() => {});
     }, 500);
   }, []);
 
-  // Derived colors
-  const colors = buildColors(serverSettings.theme, serverSettings.customThemes);
+  // Derived colors: theme from local, customThemes from server
+  const currentTheme = localSettings.theme || 'dark';
+  const colors = buildColors(currentTheme, serverSettings.customThemes);
 
   // Combined settings object for consumers
   const settings = {
     ...serverSettings,
+    theme: currentTheme,
     colors,
-    // no more mono or chordSizeOffset
   };
 
   const updateSettings = useCallback((updates) => {
@@ -155,28 +159,34 @@ export function useLocalSettings() {
 
   const applyTheme = useCallback((themeName) => {
     if (!THEMES[themeName]) return;
-    updateSettings({ theme: themeName });
-  }, [updateSettings]);
+    setLocalSettings(prev => {
+      const next = { ...prev, theme: themeName };
+      saveLocal(next);
+      return next;
+    });
+  }, []);
 
   const saveThemeColor = useCallback((colorKey, colorValue) => {
     setServerSettings(prev => {
       const customThemes = { ...prev.customThemes };
-      customThemes[prev.theme] = { ...customThemes[prev.theme], [colorKey]: colorValue };
+      const themeName = localSettings.theme || 'dark';
+      customThemes[themeName] = { ...customThemes[themeName], [colorKey]: colorValue };
       const next = { ...prev, customThemes };
       saveToServer(next);
       return next;
     });
-  }, [saveToServer]);
+  }, [saveToServer, localSettings.theme]);
 
   const resetTheme = useCallback(() => {
     setServerSettings(prev => {
       const customThemes = { ...prev.customThemes };
-      delete customThemes[prev.theme];
+      const themeName = localSettings.theme || 'dark';
+      delete customThemes[themeName];
       const next = { ...prev, customThemes };
       saveToServer(next);
       return next;
     });
-  }, [saveToServer]);
+  }, [saveToServer, localSettings.theme]);
 
   return { settings, updateSettings, getSongSettings, updateSongSettings, applyTheme, saveThemeColor, resetTheme, loaded };
 }
