@@ -168,7 +168,7 @@ export default function SongEditor() {
                 <div style={{ color: colors.text }}>Секции:</div>
                 <div>{'{sov}'} ... {'{eov}'} — куплет (verse)</div>
                 <div>{'{soc: Припев}'} ... {'{eoc}'} — припев (chorus)</div>
-                <div>{'{sob: Bridge}'} ... {'{eob}'} — бридж</div>
+                <div>{'{sob: Бридж}'} ... {'{eob}'} — бридж (переход)</div>
               </div>
               <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 8 }}>
                 <div style={{ color: colors.text }}>Комментарии и метаданные:</div>
