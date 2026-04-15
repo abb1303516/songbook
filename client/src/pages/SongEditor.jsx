@@ -156,8 +156,6 @@ export default function SongEditor() {
               fontSize={15}
               lineHeight={1.4}
               chordColor={colors.chords}
-              chordSizeOffset={settings.chordSizeOffset}
-              mono={settings.mono}
               colors={colors}
             />
           </div>

@@ -11,7 +11,7 @@ const STATUS_LABELS = { new: 'Новые', learning: 'Учу', known: 'Знаю'
 
 export default function SongList() {
   const { songs, setlists, loading, reload, setNavList } = useSongs();
-  const { settings, getSongSettings } = useSettings();
+  const { settings } = useSettings();
   const { colors } = settings;
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
@@ -147,7 +147,7 @@ export default function SongList() {
           </thead>
           <tbody>
             {filtered.map(song => {
-              const t = getSongSettings(song.id).transpose;
+              const t = song.transpose || 0;
               const k = song.key ? (t ? transposeKey(song.key, t) : song.key) : '';
               const displayKey = settings.useH ? chordToH(k) : k;
               const status = song.status || 'new';

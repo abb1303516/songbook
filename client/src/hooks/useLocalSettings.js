@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { fetchSettings, saveSettings as saveSettingsApi } from '../api/songs';
 
-const STORAGE_KEY = 'songbook-settings';
+const LOCAL_KEY = 'songbook-local';
 
 const THEMES = {
   dark: {
@@ -53,89 +54,131 @@ const THEMES = {
   },
 };
 
-const DEFAULT_SETTINGS = {
+// Server-synced settings defaults
+const SERVER_DEFAULTS = {
   theme: 'dark',
-  colors: { ...THEMES.dark },
-  customThemes: {}, // { dark: { chords: '#ff0000' }, ... } — user overrides per theme
-  mono: false,
-  chordSizeOffset: 0,
+  customThemes: {},
+  fontSize: 16,
+  lineHeight: 1.4,
   showChords: true,
   useH: true,
-  autoScrollSpeed: 30,
-  songSettings: {},
 };
 
-function loadSettings() {
+// Per-device settings (localStorage only)
+function loadLocal() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const saved = JSON.parse(raw);
-      return { ...DEFAULT_SETTINGS, ...saved };
-    }
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if (raw) return JSON.parse(raw);
   } catch { /* ignore */ }
-  return { ...DEFAULT_SETTINGS };
+  return {};
 }
 
-function saveSettings(settings) {
+function saveLocal(data) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(data));
   } catch { /* ignore */ }
+}
+
+function buildColors(theme, customThemes) {
+  const base = THEMES[theme] || THEMES.dark;
+  const overrides = customThemes?.[theme] || {};
+  return { ...base, ...overrides };
 }
 
 export function useLocalSettings() {
-  const [settings, setSettingsState] = useState(loadSettings);
+  // Server settings (synced)
+  const [serverSettings, setServerSettings] = useState(SERVER_DEFAULTS);
+  const [loaded, setLoaded] = useState(false);
+  const saveTimer = useRef(null);
+
+  // Per-device settings (localStorage)
+  const [localSettings, setLocalSettings] = useState(loadLocal);
+
+  // Fetch from server on mount
+  useEffect(() => {
+    fetchSettings()
+      .then(data => {
+        if (data && typeof data === 'object' && data.theme) {
+          setServerSettings({ ...SERVER_DEFAULTS, ...data });
+        }
+      })
+      .catch(() => { /* use defaults */ })
+      .finally(() => setLoaded(true));
+  }, []);
+
+  // Debounced save to server
+  const saveToServer = useCallback((newSettings) => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      const { theme, customThemes, fontSize, lineHeight, showChords, useH } = newSettings;
+      saveSettingsApi({ theme, customThemes, fontSize, lineHeight, showChords, useH }).catch(() => {});
+    }, 500);
+  }, []);
+
+  // Derived colors
+  const colors = buildColors(serverSettings.theme, serverSettings.customThemes);
+
+  // Combined settings object for consumers
+  const settings = {
+    ...serverSettings,
+    colors,
+    // no more mono or chordSizeOffset
+  };
 
   const updateSettings = useCallback((updates) => {
-    setSettingsState(prev => {
+    setServerSettings(prev => {
       const next = typeof updates === 'function' ? updates(prev) : { ...prev, ...updates };
-      saveSettings(next);
+      saveToServer(next);
+      return next;
+    });
+  }, [saveToServer]);
+
+  // Per-song local settings (fitScale only — per-device)
+  const getSongSettings = useCallback((songId) => {
+    const defaults = { fitScale: null };
+    return { ...defaults, ...localSettings.songSettings?.[songId] };
+  }, [localSettings.songSettings]);
+
+  const updateSongSettings = useCallback((songId, updates) => {
+    setLocalSettings(prev => {
+      const next = {
+        ...prev,
+        songSettings: {
+          ...prev.songSettings,
+          [songId]: { ...prev.songSettings?.[songId], ...updates },
+        },
+      };
+      saveLocal(next);
       return next;
     });
   }, []);
 
-  const getSongSettings = useCallback((songId) => {
-    const defaults = { transpose: 0, fontSize: 16, lineHeight: 1.4, fitScale: null };
-    return { ...defaults, ...settings.songSettings[songId] };
-  }, [settings.songSettings]);
-
-  const updateSongSettings = useCallback((songId, updates) => {
-    updateSettings(prev => ({
-      ...prev,
-      songSettings: {
-        ...prev.songSettings,
-        [songId]: { ...prev.songSettings[songId], ...updates },
-      },
-    }));
+  const applyTheme = useCallback((themeName) => {
+    if (!THEMES[themeName]) return;
+    updateSettings({ theme: themeName });
   }, [updateSettings]);
 
-  const applyTheme = useCallback((themeName) => {
-    const themeColors = THEMES[themeName];
-    if (themeColors) {
-      const overrides = settings.customThemes?.[themeName] || {};
-      updateSettings({ theme: themeName, colors: { ...themeColors, ...overrides } });
-    }
-  }, [updateSettings, settings.customThemes]);
-
   const saveThemeColor = useCallback((colorKey, colorValue) => {
-    const themeName = settings.theme;
-    const customThemes = { ...settings.customThemes };
-    customThemes[themeName] = { ...customThemes[themeName], [colorKey]: colorValue };
-    updateSettings({
-      customThemes,
-      colors: { ...settings.colors, [colorKey]: colorValue },
+    setServerSettings(prev => {
+      const customThemes = { ...prev.customThemes };
+      customThemes[prev.theme] = { ...customThemes[prev.theme], [colorKey]: colorValue };
+      const next = { ...prev, customThemes };
+      saveToServer(next);
+      return next;
     });
-  }, [updateSettings, settings]);
+  }, [saveToServer]);
 
   const resetTheme = useCallback(() => {
-    const themeName = settings.theme;
-    const base = THEMES[themeName];
-    if (!base) return;
-    const customThemes = { ...settings.customThemes };
-    delete customThemes[themeName];
-    updateSettings({ customThemes, colors: { ...base } });
-  }, [updateSettings, settings]);
+    setServerSettings(prev => {
+      const customThemes = { ...prev.customThemes };
+      delete customThemes[prev.theme];
+      const next = { ...prev, customThemes };
+      saveToServer(next);
+      return next;
+    });
+  }, [saveToServer]);
 
-  return { settings, updateSettings, getSongSettings, updateSongSettings, applyTheme, saveThemeColor, resetTheme };
+  return { settings, updateSettings, getSongSettings, updateSongSettings, applyTheme, saveThemeColor, resetTheme, loaded };
 }
 
 export { THEMES };

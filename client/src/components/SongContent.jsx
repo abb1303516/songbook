@@ -9,14 +9,10 @@ export default function SongContent({
   fontSize = 16,
   lineHeight = 1.4,
   chordColor = '#6bb3ff',
-  chordSizeOffset = 0,
-  mono = false,
   useH = false,
   colors = {},
 }) {
   const { sections } = useMemo(() => parseChordPro(chordpro || ''), [chordpro]);
-
-  const chordSize = Math.max(fontSize + chordSizeOffset * 2, 8);
 
   return (
     <div style={{ fontSize, lineHeight }}>
@@ -61,8 +57,7 @@ export default function SongContent({
                 transpose={transpose}
                 showChords={showChords}
                 chordColor={chordColor}
-                chordSize={chordSize}
-                mono={mono}
+                fontSize={fontSize}
                 useH={useH}
               />
             ))}

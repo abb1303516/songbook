@@ -485,15 +485,6 @@ export default function Sidebar() {
               <div>
                 <div className="text-xs font-semibold mb-1" style={{ color: colors.textMuted }}>Просмотр</div>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs" style={{ color: colors.textMuted }}>Аккорды</span>
-                    <input type="range" min="-3" max="3" value={settings.chordSizeOffset} onChange={e => updateSettings({ chordSizeOffset: +e.target.value })} className="flex-1" />
-                    <span className="font-mono text-xs w-5 text-center">{settings.chordSizeOffset > 0 ? '+' : ''}{settings.chordSizeOffset}</span>
-                  </div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={settings.mono} onChange={e => updateSettings({ mono: e.target.checked })} className="w-3.5 h-3.5" />
-                    <span className="text-xs">Моноширинный шрифт</span>
-                  </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={settings.useH} onChange={e => updateSettings({ useH: e.target.checked })} className="w-3.5 h-3.5" />
                     <span className="text-xs">Нотация H (Hm вместо Bm)</span>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchSong, fetchSetlist } from '../api/songs';
+import { fetchSong, fetchSetlist, updateSongTranspose } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useSongs } from '../context/SongsContext';
 import { useSongControls } from '../context/SongControlsContext';
@@ -21,14 +21,17 @@ export default function SongView() {
   const [hoverRight, setHoverRight] = useState(false);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
-  const { settings, getSongSettings, updateSongSettings } = useSettings();
+  const { settings, updateSettings, getSongSettings, updateSongSettings } = useSettings();
   const { songs, setlists, navList, setNavList, reload } = useSongs();
   const { registerControls, unregisterControls } = useSongControls();
   const { colors } = settings;
   const autoScroll = useAutoScroll(containerRef);
 
-  const songSettings = getSongSettings(id);
-  const { transpose, fontSize, lineHeight, fitScale } = songSettings;
+  // Transpose from song (server), fontSize/lineHeight from settings (server), fitScale from local
+  const transpose = song?.transpose || 0;
+  const { fontSize, lineHeight } = settings;
+  const localSongSettings = getSongSettings(id);
+  const { fitScale } = localSongSettings;
 
   const effectiveFontSize = fitScale ? Math.max(Math.round(fontSize * fitScale), 8) : fontSize;
   const effectiveLineHeight = fitScale ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0) : lineHeight;
@@ -103,9 +106,13 @@ export default function SongView() {
       fitScale,
       scrollOn: autoScroll.on,
       scrollSpeed: autoScroll.speed,
-      onTranspose: (delta) => updateSongSettings(id, { transpose: transpose + delta }),
-      onFontSize: (val) => updateSongSettings(id, { fontSize: val }),
-      onLineHeight: (val) => updateSongSettings(id, { lineHeight: val }),
+      onTranspose: (delta) => {
+        const newT = transpose + delta;
+        setSong(prev => prev ? { ...prev, transpose: newT } : prev);
+        updateSongTranspose(id, newT).catch(() => {});
+      },
+      onFontSize: (val) => updateSettings({ fontSize: val }),
+      onLineHeight: (val) => updateSettings({ lineHeight: val }),
       onAutoFit: autoFit,
       onFitReset: resetFit,
       onFitIncrease: () => adjustFit(FIT_STEP),
@@ -113,7 +120,7 @@ export default function SongView() {
       onScrollToggle: () => autoScroll.setOn(!autoScroll.on),
       onScrollSpeed: (val) => autoScroll.setSpeed(val),
     });
-  }, [id, transpose, fontSize, lineHeight, fitScale, autoScroll.on, autoScroll.speed, registerControls, updateSongSettings, autoFit, resetFit, adjustFit]);
+  }, [id, transpose, fontSize, lineHeight, fitScale, autoScroll.on, autoScroll.speed, registerControls, updateSettings, autoFit, resetFit, adjustFit]);
 
   useEffect(() => {
     return () => unregisterControls();
@@ -210,8 +217,6 @@ export default function SongView() {
             fontSize={effectiveFontSize}
             lineHeight={effectiveLineHeight}
             chordColor={colors.chords}
-            chordSizeOffset={settings.chordSizeOffset}
-            mono={settings.mono}
             useH={settings.useH}
             colors={colors}
           />

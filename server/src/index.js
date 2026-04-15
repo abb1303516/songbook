@@ -6,6 +6,7 @@ import setlistsRouter from './routes/setlists.js';
 import adminRouter from './routes/admin.js';
 import importRouter from './routes/import.js';
 import exportRouter from './routes/export.js';
+import settingsRouter from './routes/settings.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,6 +35,9 @@ app.get('/api/setlists', setlistsRouter.list);
 app.get('/api/setlists/:id', setlistsRouter.get);
 app.get('/api/export', exportRouter.exportAll);
 app.put('/api/songs/:id/status', songsRouter.updateStatus);
+app.put('/api/songs/:id/transpose', songsRouter.updateTranspose);
+app.get('/api/settings', settingsRouter.get);
+app.put('/api/settings', settingsRouter.update);
 
 // Admin routes
 app.post('/api/admin/verify', adminRouter.verify);

@@ -36,6 +36,31 @@ export async function updateSong(id, data) {
   return res.json();
 }
 
+export async function updateSongTranspose(id, transpose) {
+  const res = await fetch(`${API}/songs/${id}/transpose`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transpose }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error);
+  return res.json();
+}
+
+export async function fetchSettings() {
+  const res = await fetch(`${API}/settings`);
+  return res.json();
+}
+
+export async function saveSettings(data) {
+  const res = await fetch(`${API}/settings`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error((await res.json()).error);
+  return res.json();
+}
+
 export async function updateSongStatus(id, status) {
   const res = await fetch(`${API}/songs/${id}/status`, {
     method: 'PUT',

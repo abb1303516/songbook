@@ -7,7 +7,7 @@ function genId() {
 export default {
   async list(req, res) {
     const { rows } = await pool.query(
-      'SELECT id, title, artist, key, tags, status, sort_order, created_at FROM songs ORDER BY sort_order, title'
+      'SELECT id, title, artist, key, tags, status, transpose, sort_order, created_at FROM songs ORDER BY sort_order, title'
     );
     res.json(rows);
   },
@@ -48,6 +48,19 @@ export default {
        WHERE id = $1
        RETURNING *`,
       [req.params.id, title, artist, key, chordpro, tags, sort_order, status]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Песня не найдена' });
+    res.json(rows[0]);
+  },
+
+  async updateTranspose(req, res) {
+    const { transpose } = req.body;
+    if (typeof transpose !== 'number' || transpose < -12 || transpose > 12) {
+      return res.status(400).json({ error: 'Недопустимое значение транспонирования' });
+    }
+    const { rows } = await pool.query(
+      'UPDATE songs SET transpose = $2, updated_at = NOW() WHERE id = $1 RETURNING id, transpose',
+      [req.params.id, transpose]
     );
     if (!rows.length) return res.status(404).json({ error: 'Песня не найдена' });
     res.json(rows[0]);
