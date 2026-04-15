@@ -9,7 +9,7 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
     const bg = chordBg && chordBg !== 'transparent' ? chordBg : chordColor + '22';
     chordSpanStyle.backgroundColor = bg;
     chordSpanStyle.borderRadius = '3px';
-    chordSpanStyle.padding = '2px 4px';
+    chordSpanStyle.padding = '0px 4px';
     chordSpanStyle.margin = '0 -4px';
   }
   if (chordStyle === 'border' || chordStyle === 'both') {
