@@ -1,10 +1,11 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongsContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
-import { updateSongStatus, updateSetlist } from '../api/songs';
+import { updateSongStatus } from '../api/songs';
 import { chordToH, transposeKey } from '../utils/transpose';
+import SongMenu from '../components/SongMenu';
 
 const STATUS_LABELS = { new: 'Новые', learning: 'Учу', known: 'Знаю' };
 
@@ -17,17 +18,6 @@ export default function SongList() {
   const [searchParams] = useSearchParams();
   const [sortCol, setSortCol] = useState('title');
   const [sortAsc, setSortAsc] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(null); // song id or null
-  const menuRef = useRef(null);
-
-  // Close menu on click outside
-  useEffect(() => {
-    const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(null);
-    };
-    if (menuOpen) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [menuOpen]);
 
   // Read filters from URL (set by Sidebar)
   const qFilter = searchParams.get('q') || '';
@@ -195,58 +185,8 @@ export default function SongList() {
                     </button>
                   </td>
                   <td className="px-3 py-2.5 text-xs" style={{ color: colors.textMuted }}>{date}</td>
-                  <td className="px-1 py-2.5 relative">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === song.id ? null : song.id); }}
-                      className="p-1 rounded cursor-pointer"
-                      style={{ color: colors.textMuted }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" />
-                      </svg>
-                    </button>
-                    {menuOpen === song.id && (
-                      <div
-                        ref={menuRef}
-                        className="absolute right-0 top-8 z-50 rounded-lg shadow-xl py-1 min-w-[160px]"
-                        style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}`, boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-                      >
-                        {isAdmin && (
-                          <Link
-                            to={`/admin/songs/${song.id}`}
-                            className="block px-3 py-1.5 text-xs hover:opacity-80"
-                            style={{ color: colors.text }}
-                            onClick={() => setMenuOpen(null)}
-                          >
-                            Редактировать
-                          </Link>
-                        )}
-                        {setlists.length > 0 && (
-                          <>
-                            <div className="px-3 py-1 text-xs" style={{ color: colors.textMuted }}>Добавить в сет-лист:</div>
-                            {setlists.map(sl => (
-                              <button
-                                key={sl.id}
-                                className="block w-full text-left px-3 py-1.5 text-xs hover:opacity-80"
-                                style={{ color: colors.chords }}
-                                onClick={async () => {
-                                  const ids = sl.song_ids || [];
-                                  if (!ids.includes(song.id)) {
-                                    try {
-                                      await updateSetlist(sl.id, { song_ids: [...ids, song.id] });
-                                      reload();
-                                    } catch (e) { alert(e.message); }
-                                  }
-                                  setMenuOpen(null);
-                                }}
-                              >
-                                {sl.name} {(sl.song_ids || []).includes(song.id) ? '✓' : ''}
-                              </button>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    )}
+                  <td className="px-1 py-2.5">
+                    <SongMenu songId={song.id} songStatus={status} onStatusChange={() => reload()} />
                   </td>
                 </tr>
               );

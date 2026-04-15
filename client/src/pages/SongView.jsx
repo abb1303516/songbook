@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchSong, fetchSetlist, updateSongStatus, updateSetlist, deleteSong } from '../api/songs';
+import { fetchSong, fetchSetlist } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
-import { useAdmin } from '../context/AdminContext';
 import { useSongs } from '../context/SongsContext';
 import { useSongControls } from '../context/SongControlsContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import { transposeKey, chordToH } from '../utils/transpose';
 import SongContent from '../components/SongContent';
+import SongMenu from '../components/SongMenu';
 
 const FIT_STEP = 0.05;
-const STATUS_CYCLE = ['new', 'learning', 'known'];
-const STATUS_LABELS = { new: 'Новые', learning: 'Учу', known: 'Знаю' };
 
 export default function SongView() {
   const { id } = useParams();
@@ -19,14 +17,11 @@ export default function SongView() {
   const [searchParams] = useSearchParams();
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [hoverLeft, setHoverLeft] = useState(false);
   const [hoverRight, setHoverRight] = useState(false);
-  const menuRef = useRef(null);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const { settings, getSongSettings, updateSongSettings } = useSettings();
-  const { isAdmin } = useAdmin();
   const { songs, setlists, navList, setNavList, reload } = useSongs();
   const { registerControls, unregisterControls } = useSongControls();
   const { colors } = settings;
@@ -67,15 +62,6 @@ export default function SongView() {
       navigate(`/song/${nextId}${params}`);
     }
   };
-
-  // Close menu on click outside
-  useEffect(() => {
-    const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
-    };
-    if (menuOpen) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [menuOpen]);
 
   // Fit-to-screen
   const autoFit = useCallback(() => {
@@ -177,105 +163,11 @@ export default function SongView() {
         </div>
 
         {/* Three-dot menu */}
-        <div className="relative flex-shrink-0">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1.5 rounded cursor-pointer"
-            style={{ color: colors.textMuted }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" />
-            </svg>
-          </button>
-          {menuOpen && (
-            <div
-              ref={menuRef}
-              className="absolute right-0 top-8 z-50 rounded-lg py-1 min-w-[180px]"
-              style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}`, boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-            >
-              {/* Edit */}
-              {isAdmin && (
-                <button
-                  onClick={() => { setMenuOpen(false); navigate(`/admin/songs/${id}`); }}
-                  className="block w-full text-left px-3 py-1.5 text-xs hover:opacity-80"
-                  style={{ color: colors.text }}
-                >
-                  Редактировать
-                </button>
-              )}
-
-              {/* Status */}
-              <div className="px-3 py-1 text-xs" style={{ color: colors.textMuted }}>Статус:</div>
-              {STATUS_CYCLE.map(s => (
-                <button
-                  key={s}
-                  onClick={async () => {
-                    try {
-                      await updateSongStatus(id, s);
-                      setSong(prev => ({ ...prev, status: s }));
-                      reload();
-                    } catch (e) { /* ignore */ }
-                    setMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-1.5 text-xs hover:opacity-80"
-                  style={{ color: songStatus === s ? colors.chords : colors.text }}
-                >
-                  {songStatus === s ? '✓ ' : '  '}{STATUS_LABELS[s]}
-                </button>
-              ))}
-
-              {/* Setlists */}
-              {setlists.length > 0 && (
-                <>
-                  <div className="px-3 py-1 text-xs mt-1" style={{ color: colors.textMuted, borderTop: `1px solid ${colors.border}` }}>Сет-листы:</div>
-                  {setlists.map(sl => {
-                    const inList = (sl.song_ids || []).includes(id);
-                    return (
-                      <button
-                        key={sl.id}
-                        onClick={async () => {
-                          const ids = sl.song_ids || [];
-                          try {
-                            if (inList) {
-                              await updateSetlist(sl.id, { song_ids: ids.filter(i => i !== id) });
-                            } else {
-                              await updateSetlist(sl.id, { song_ids: [...ids, id] });
-                            }
-                            reload();
-                          } catch (e) { /* ignore */ }
-                          setMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-3 py-1.5 text-xs hover:opacity-80"
-                        style={{ color: inList ? colors.chords : colors.text }}
-                      >
-                        {inList ? '✓ ' : '  '}{sl.name}
-                      </button>
-                    );
-                  })}
-                </>
-              )}
-
-              {/* Delete */}
-              {isAdmin && (
-                <button
-                  onClick={async () => {
-                    if (!confirm('Удалить песню?')) return;
-                    try {
-                      await deleteSong(id);
-                      reload();
-                      navigate('/');
-                    } catch (e) { alert(e.message); }
-                    setMenuOpen(false);
-                  }}
-                  className="block w-full text-left px-3 py-1.5 text-xs mt-1 hover:opacity-80"
-                  style={{ color: '#e05555', borderTop: `1px solid ${colors.border}` }}
-                >
-                  Удалить
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        <SongMenu
+          songId={id}
+          songStatus={songStatus}
+          onStatusChange={(s) => setSong(prev => ({ ...prev, status: s }))}
+        />
       </header>
 
       {/* Song content with gallery arrows */}
