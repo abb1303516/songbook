@@ -394,7 +394,7 @@ export default function Sidebar() {
                   >
                     {sl.name}
                   </Link>
-                  <span className="flex-shrink-0" style={{ color: colors.textMuted }}>{sl.song_ids?.length || 0}</span>
+                  <span className="flex-shrink-0" style={{ color: isActive ? colors.bg : colors.textMuted }}>{sl.song_ids?.length || 0}</span>
                   {isAdmin && (
                     <Link
                       to={`/admin/setlists/${sl.id}`}
