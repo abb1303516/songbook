@@ -571,7 +571,7 @@ export default function Sidebar() {
                         const cycle = ['none', 'bg', 'border', 'both'];
                         const cur = settings.chordStyle || 'none';
                         const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
-                        updateSettings({ chordStyle: next });
+                        saveThemeColor('chordStyle', next);
                       }}
                       className="px-2 py-0.5 rounded text-xs cursor-pointer"
                       style={{

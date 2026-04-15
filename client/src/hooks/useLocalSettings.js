@@ -130,11 +130,15 @@ export function useLocalSettings() {
   // Derived colors: theme from local, customThemes from server
   const currentTheme = localSettings.theme || 'dark';
   const colors = buildColors(currentTheme, serverSettings.customThemes);
+  // chordStyle per-theme (stored in customThemes) with fallback to global
+  const themeOverrides = serverSettings.customThemes?.[currentTheme] || {};
+  const effectiveChordStyle = themeOverrides.chordStyle ?? serverSettings.chordStyle ?? 'none';
 
   // Combined settings object for consumers
   const settings = {
     ...serverSettings,
     theme: currentTheme,
+    chordStyle: effectiveChordStyle,
     colors,
   };
 
