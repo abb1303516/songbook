@@ -182,13 +182,13 @@ export default function SongView() {
         {/* Left arrow */}
         {hasPrev && (
           <div
-            className="absolute left-0 top-0 bottom-0 w-12 z-10 flex items-center justify-center cursor-pointer transition-opacity"
-            style={{ opacity: hoverLeft ? 1 : 0, background: `linear-gradient(to right, ${colors.bg}cc, transparent)` }}
+            className="absolute left-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer transition-opacity"
+            style={{ opacity: hoverLeft ? 1 : 0, background: `linear-gradient(to right, ${colors.surface}ee, ${colors.surface}88, transparent)` }}
             onMouseEnter={() => setHoverLeft(true)}
             onMouseLeave={() => setHoverLeft(false)}
             onClick={() => goTo(currentIdx - 1)}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth="2">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </div>
@@ -197,13 +197,13 @@ export default function SongView() {
         {/* Right arrow */}
         {hasNext && (
           <div
-            className="absolute right-0 top-0 bottom-0 w-12 z-10 flex items-center justify-center cursor-pointer transition-opacity"
-            style={{ opacity: hoverRight ? 1 : 0, background: `linear-gradient(to left, ${colors.bg}cc, transparent)` }}
+            className="absolute right-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer transition-opacity"
+            style={{ opacity: hoverRight ? 1 : 0, background: `linear-gradient(to left, ${colors.surface}ee, ${colors.surface}88, transparent)` }}
             onMouseEnter={() => setHoverRight(true)}
             onMouseLeave={() => setHoverRight(false)}
             onClick={() => goTo(currentIdx + 1)}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.textMuted} strokeWidth="2">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </div>
