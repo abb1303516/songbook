@@ -163,6 +163,72 @@ export default function Sidebar() {
         {iconBtn('Сет-листы', <IconList />, () => { toggle(); setSetlistsOpen(true); })}
         {isAdmin && iconBtn('Добавить песню', <IconPlus />, () => { navigate('/admin/songs/new'); })}
         {iconBtn('Настройки', <IconSettings />, () => { toggle(); setSettingsOpen(true); })}
+
+        {/* Quick controls when viewing a song */}
+        {controls && (
+          <>
+            <div className="mt-auto" style={{ borderTop: `1px solid ${colors.border}` }} />
+            {/* Transpose */}
+            <div className="flex flex-col items-center py-1" title="Тональность">
+              <button
+                onClick={() => controls.onTranspose(1)}
+                className="w-full flex items-center justify-center py-1 cursor-pointer transition-colors"
+                style={{ color: colors.textMuted }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseLeave={e => { e.currentTarget.style.color = colors.textMuted; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 15l-6-6-6 6" /></svg>
+              </button>
+              <span className="text-xs font-mono" style={{ color: controls.transpose !== 0 ? colors.chords : colors.textMuted }}>
+                {controls.transpose > 0 ? '+' : ''}{controls.transpose}
+              </span>
+              <button
+                onClick={() => controls.onTranspose(-1)}
+                className="w-full flex items-center justify-center py-1 cursor-pointer transition-colors"
+                style={{ color: colors.textMuted }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseLeave={e => { e.currentTarget.style.color = colors.textMuted; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+            </div>
+            {/* Scale */}
+            <div className="flex flex-col items-center py-1" title="Масштаб" style={{ borderTop: `1px solid ${colors.border}` }}>
+              <button
+                onClick={controls.onFitIncrease}
+                className="w-full flex items-center justify-center py-1 cursor-pointer transition-colors"
+                style={{ color: colors.textMuted }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseLeave={e => { e.currentTarget.style.color = colors.textMuted; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </button>
+              <span className="text-xs font-mono" style={{ color: controls.fitScale ? colors.chords : colors.textMuted }}>
+                {controls.fitScale ? `${Math.round(controls.fitScale * 100)}` : '—'}
+              </span>
+              <button
+                onClick={controls.onFitDecrease}
+                className="w-full flex items-center justify-center py-1 cursor-pointer transition-colors"
+                style={{ color: colors.textMuted }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseLeave={e => { e.currentTarget.style.color = colors.textMuted; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </button>
+            </div>
+            {/* Columns */}
+            <button
+              onClick={controls.onColumns}
+              className="w-full flex items-center justify-center py-2.5 cursor-pointer transition-colors"
+              style={{ color: controls.columns > 1 ? colors.chords : colors.textMuted, borderTop: `1px solid ${colors.border}` }}
+              title={`Колонки: ${controls.columns || 1}`}
+              onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+              onMouseLeave={e => { e.currentTarget.style.color = controls.columns > 1 ? colors.chords : colors.textMuted; }}
+            >
+              <span className="text-xs font-bold">{controls.columns || 1}</span>
+            </button>
+          </>
+        )}
       </aside>
     );
   }
