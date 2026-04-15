@@ -511,39 +511,55 @@ export default function Sidebar() {
               <IconChevronRight />
             </button>
             {songControlsOpen && (
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2.5">
+                {/* Transpose */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs w-16" style={{ color: colors.textMuted }}>Тональность</span>
-                  <button onClick={() => controls.onTranspose(-1)} className="px-1.5 py-0.5 rounded font-mono text-xs" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>-</button>
-                  <span className="w-6 text-center font-mono text-xs">{controls.transpose > 0 ? '+' : ''}{controls.transpose}</span>
-                  <button onClick={() => controls.onTranspose(1)} className="px-1.5 py-0.5 rounded font-mono text-xs" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>+</button>
+                  <span className="text-xs w-16" style={{ color: colors.textMuted }}>Тон</span>
+                  <button onClick={() => controls.onTranspose(-1)} className="px-3 py-1 rounded font-mono text-sm cursor-pointer" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>−</button>
+                  <span className="w-7 text-center font-mono text-sm">{controls.transpose > 0 ? '+' : ''}{controls.transpose}</span>
+                  <button onClick={() => controls.onTranspose(1)} className="px-3 py-1 rounded font-mono text-sm cursor-pointer" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>+</button>
                 </div>
+                {/* Font size */}
                 <div className="flex items-center gap-2">
                   <span className="text-xs w-16" style={{ color: colors.textMuted }}>Шрифт</span>
                   <input type="range" min="10" max="28" value={controls.fontSize} onChange={e => controls.onFontSize(+e.target.value)} className="flex-1" />
-                  <span className="w-5 text-center font-mono text-xs">{controls.fontSize}</span>
+                  <span className="w-6 text-center font-mono text-sm">{controls.fontSize}</span>
                 </div>
+                {/* Line height */}
                 <div className="flex items-center gap-2">
                   <span className="text-xs w-16" style={{ color: colors.textMuted }}>Интервал</span>
-                  <input type="range" min="1.0" max="2.0" step="0.1" value={controls.lineHeight} onChange={e => controls.onLineHeight(+e.target.value)} className="flex-1" />
-                  <span className="w-5 text-center font-mono text-xs">{controls.lineHeight}</span>
+                  <input type="range" min="0.8" max="2.5" step="0.1" value={controls.lineHeight} onChange={e => controls.onLineHeight(+e.target.value)} className="flex-1" />
+                  <span className="w-6 text-center font-mono text-sm">{controls.lineHeight}</span>
                 </div>
+                {/* Fit to screen */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs w-16" style={{ color: colors.textMuted }}>В экран</span>
-                  <button onClick={controls.onFitDecrease} className="px-1.5 py-0.5 rounded font-mono text-xs" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>-</button>
+                  <span className="text-xs w-16" style={{ color: colors.textMuted }}>Масштаб</span>
+                  <button onClick={controls.onFitDecrease} className="px-3 py-1 rounded font-mono text-sm cursor-pointer" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>−</button>
                   <button
                     onClick={controls.fitScale ? controls.onFitReset : controls.onAutoFit}
-                    className="px-2 py-0.5 rounded text-xs font-medium"
+                    className="px-3 py-1 rounded text-sm font-medium cursor-pointer"
                     style={{ backgroundColor: controls.fitScale ? colors.chords : colors.bg, color: controls.fitScale ? colors.bg : colors.textMuted, border: `1px solid ${controls.fitScale ? colors.chords : colors.border}` }}
                   >{controls.fitScale ? `${Math.round(controls.fitScale * 100)}%` : 'Авто'}</button>
-                  <button onClick={controls.onFitIncrease} className="px-1.5 py-0.5 rounded font-mono text-xs" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>+</button>
+                  <button onClick={controls.onFitIncrease} className="px-3 py-1 rounded font-mono text-sm cursor-pointer" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>+</button>
                 </div>
+                {/* Columns */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs w-16" style={{ color: colors.textMuted }}>Колонки</span>
+                  <button
+                    onClick={controls.onColumns}
+                    className="px-3 py-1 rounded text-sm font-medium cursor-pointer"
+                    style={{ backgroundColor: colors.bg, color: controls.columns > 1 ? colors.chords : colors.textMuted, border: `1px solid ${controls.columns > 1 ? colors.chords : colors.border}` }}
+                  >
+                    {controls.columns > 1 ? `${controls.columns} колонки` : '1 колонка'}
+                  </button>
+                </div>
+                {/* Auto-scroll */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={controls.onScrollToggle}
-                    className="px-2 py-0.5 rounded text-xs font-medium"
+                    className="px-3 py-1 rounded text-sm font-medium cursor-pointer"
                     style={{ backgroundColor: controls.scrollOn ? '#4caf50' : colors.bg, color: controls.scrollOn ? '#fff' : colors.textMuted, border: `1px solid ${controls.scrollOn ? '#4caf50' : colors.border}` }}
-                  >{controls.scrollOn ? 'Stop' : 'Прокрутка'}</button>
+                  >{controls.scrollOn ? 'Стоп' : 'Прокрутка'}</button>
                   {controls.scrollOn && (
                     <input type="range" min="0" max="100" value={controls.scrollSpeed} onChange={e => controls.onScrollSpeed(+e.target.value)} className="flex-1" />
                   )}

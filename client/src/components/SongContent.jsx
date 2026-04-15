@@ -11,15 +11,22 @@ export default function SongContent({
   chordColor = '#6bb3ff',
   useH = false,
   colors = {},
+  columns = 1,
 }) {
   const { sections } = useMemo(() => parseChordPro(chordpro || ''), [chordpro]);
 
+  const columnStyle = columns > 1 ? {
+    columnCount: columns,
+    columnGap: '2em',
+    columnRule: `1px solid ${colors.border || '#333'}`,
+  } : {};
+
   return (
-    <div style={{ fontSize, lineHeight }}>
+    <div style={{ fontSize, lineHeight, ...columnStyle }}>
       {sections.map((section, si) => {
         if (section.type === 'comment') {
           return (
-            <div key={si} className="italic my-2" style={{ color: colors.textMuted || '#888' }}>
+            <div key={si} className="italic my-2" style={{ color: colors.textMuted || '#888', breakInside: 'avoid' }}>
               {section.lines[0]?.pairs[0]?.text}
             </div>
           );
@@ -39,6 +46,8 @@ export default function SongContent({
           sectionStyle.borderLeft = `2px solid ${colors.bridgeBorder || 'rgba(255,255,255,0.08)'}`;
           sectionClass += ' pl-3 py-1 rounded-r';
         }
+
+        sectionStyle.breakInside = 'avoid';
 
         return (
           <div key={si} className={sectionClass} style={sectionStyle}>

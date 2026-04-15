@@ -98,6 +98,8 @@ export default function SongView() {
   }, [id, updateSongSettings]);
 
   // Register per-song controls for Sidebar
+  const columns = localSongSettings.columns || 1;
+
   useEffect(() => {
     registerControls({
       songId: id,
@@ -105,6 +107,7 @@ export default function SongView() {
       fontSize,
       lineHeight,
       fitScale,
+      columns,
       scrollOn: autoScroll.on,
       scrollSpeed: autoScroll.speed,
       onTranspose: (delta) => {
@@ -118,10 +121,14 @@ export default function SongView() {
       onFitReset: resetFit,
       onFitIncrease: () => adjustFit(FIT_STEP),
       onFitDecrease: () => adjustFit(-FIT_STEP),
+      onColumns: () => {
+        const next = columns >= 3 ? 1 : columns + 1;
+        updateSongSettings(id, { columns: next });
+      },
       onScrollToggle: () => autoScroll.setOn(!autoScroll.on),
       onScrollSpeed: (val) => autoScroll.setSpeed(val),
     });
-  }, [id, transpose, fontSize, lineHeight, fitScale, autoScroll.on, autoScroll.speed, registerControls, updateSettings, autoFit, resetFit, adjustFit]);
+  }, [id, transpose, fontSize, lineHeight, fitScale, columns, autoScroll.on, autoScroll.speed, registerControls, updateSettings, updateSongSettings, autoFit, resetFit, adjustFit]);
 
   useEffect(() => {
     return () => unregisterControls();
@@ -225,6 +232,7 @@ export default function SongView() {
             chordColor={colors.chords}
             useH={settings.useH}
             colors={colors}
+            columns={localSongSettings.columns || 1}
           />
         </div>
         </div>
