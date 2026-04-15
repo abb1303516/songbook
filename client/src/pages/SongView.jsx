@@ -17,8 +17,6 @@ export default function SongView() {
   const [searchParams] = useSearchParams();
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [hoverLeft, setHoverLeft] = useState(false);
-  const [hoverRight, setHoverRight] = useState(false);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const { settings, updateSettings, getSongSettings, updateSongSettings } = useSettings();
@@ -178,14 +176,11 @@ export default function SongView() {
       </header>
 
       {/* Song content with gallery arrows */}
-      <div ref={containerRef} className="flex-1 overflow-auto relative">
-        {/* Left arrow — click zone full height, circle button in center */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Left arrow — uses CSS hover, positioned outside scroll container */}
         {hasPrev && (
           <div
-            className="absolute left-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer"
-            style={{ opacity: hoverLeft ? 1 : 0, transition: 'opacity 0.15s' }}
-            onMouseEnter={() => setHoverLeft(true)}
-            onMouseLeave={() => setHoverLeft(false)}
+            className="gallery-arrow absolute left-0 top-0 bottom-0 w-14 z-10 flex items-center justify-center cursor-pointer"
             onClick={() => goTo(currentIdx - 1)}
           >
             <div
@@ -202,10 +197,7 @@ export default function SongView() {
         {/* Right arrow */}
         {hasNext && (
           <div
-            className="absolute right-0 top-0 bottom-0 w-16 z-10 flex items-center justify-center cursor-pointer"
-            style={{ opacity: hoverRight ? 1 : 0, transition: 'opacity 0.15s' }}
-            onMouseEnter={() => setHoverRight(true)}
-            onMouseLeave={() => setHoverRight(false)}
+            className="gallery-arrow absolute right-0 top-0 bottom-0 w-14 z-10 flex items-center justify-center cursor-pointer"
             onClick={() => goTo(currentIdx + 1)}
           >
             <div
@@ -219,7 +211,8 @@ export default function SongView() {
           </div>
         )}
 
-        <div ref={contentRef} className="px-4 py-4">
+        <div ref={containerRef} className="h-full overflow-auto">
+          <div ref={contentRef} className="px-4 py-4">
           <SongContent
             chordpro={song.chordpro}
             transpose={transpose}
@@ -230,6 +223,7 @@ export default function SongView() {
             useH={settings.useH}
             colors={colors}
           />
+        </div>
         </div>
       </div>
     </div>

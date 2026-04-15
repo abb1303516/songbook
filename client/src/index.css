@@ -33,3 +33,13 @@ aside * {
   scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
 }
 
+/* Gallery navigation arrows — CSS hover, no JS state */
+.gallery-arrow {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: auto;
+}
+.gallery-arrow:hover {
+  opacity: 1;
+}
+
