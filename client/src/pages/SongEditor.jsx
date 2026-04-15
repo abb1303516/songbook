@@ -17,6 +17,7 @@ export default function SongEditor() {
   const [chordpro, setChordpro] = useState('');
   const [status, setStatus] = useState('new');
   const [showPreview, setShowPreview] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!isNew);
 
@@ -143,6 +144,51 @@ export default function SongEditor() {
           >
             {showPreview ? 'Редактор' : 'Превью'}
           </button>
+        </div>
+
+        {/* ChordPro help */}
+        <div>
+          <button
+            onClick={() => setShowHelp(!showHelp)}
+            className="text-xs cursor-pointer"
+            style={{ color: colors.textMuted }}
+          >
+            {showHelp ? 'Скрыть справку ▾' : 'Справка ChordPro ▸'}
+          </button>
+          {showHelp && (
+            <div
+              className="mt-2 p-3 rounded-lg text-xs space-y-2 font-mono"
+              style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, color: colors.textMuted }}
+            >
+              <div>
+                <div style={{ color: colors.text }}>Аккорды в квадратных скобках:</div>
+                <div style={{ color: colors.chords }}>[Am]</div>Белый снег, <span style={{ color: colors.chords }}>[C]</span>серый лёд
+              </div>
+              <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 8 }}>
+                <div style={{ color: colors.text }}>Секции:</div>
+                <div>{'{sov}'} ... {'{eov}'} — куплет (verse)</div>
+                <div>{'{soc: Припев}'} ... {'{eoc}'} — припев (chorus)</div>
+                <div>{'{sob: Bridge}'} ... {'{eob}'} — бридж</div>
+              </div>
+              <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 8 }}>
+                <div style={{ color: colors.text }}>Комментарии и метаданные:</div>
+                <div>{'{c: Проигрыш | Am Em | F G |}'}</div>
+                <div>{'{title: Название}'} {'{artist: Исполнитель}'} {'{key: Am}'}</div>
+              </div>
+              <div style={{ borderTop: `1px solid ${colors.border}`, paddingTop: 8 }}>
+                <div style={{ color: colors.text }}>Пример:</div>
+                <div style={{ whiteSpace: 'pre-wrap' }}>{`{sov}
+[Am]Белый снег, [C]серый лёд
+[Dm]На растрескавшейся [G]земле
+{eov}
+
+{soc: Припев}
+[Am]Две тысячи лет — [F]война
+[Am]Война без особых [E]причин
+{eoc}`}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {showPreview ? (
