@@ -102,7 +102,7 @@ export default function SongList() {
               key={f.param}
               onClick={() => removeFilter(f.param)}
               className="group flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer"
-              style={{ backgroundColor: colors.chords, color: colors.bg }}
+              style={{ backgroundColor: colors.accent, color: colors.bg }}
               title="Убрать фильтр"
             >
               {f.label}

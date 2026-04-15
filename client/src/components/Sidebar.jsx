@@ -16,13 +16,16 @@ const THEME_LABELS = { dark: 'Тёмная', light: 'Светлая', contrast: 
 const COLOR_LABELS = [
   { key: 'text', label: 'Текст' },
   { key: 'textMuted', label: 'Второстепенный текст' },
+  { key: 'accent', label: 'Акцент (UI)' },
   { key: 'chords', label: 'Аккорды (шрифт)' },
   { key: 'chordBg', label: 'Аккорды (фон)' },
   { key: 'bg', label: 'Фон' },
   { key: 'surface', label: 'Фон sidebar/заголовков' },
   { key: 'border', label: 'Разделители' },
   { key: 'chorusBg', label: 'Фон припева' },
+  { key: 'chorusBorder', label: 'Рамка припева' },
   { key: 'bridgeBg', label: 'Фон бриджа' },
+  { key: 'bridgeBorder', label: 'Рамка бриджа' },
 ];
 
 // --- Icons as small components ---
@@ -175,19 +178,19 @@ export default function Sidebar() {
                 onClick={() => controls.onTranspose(1)}
                 className="w-full flex items-center justify-center py-1.5 cursor-pointer transition-colors"
                 style={{ color: colors.text }}
-                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.accent; }}
                 onMouseLeave={e => { e.currentTarget.style.color = colors.text; }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 15l-6-6-6 6" /></svg>
               </button>
-              <span className="text-sm font-mono font-bold" style={{ color: controls.transpose !== 0 ? colors.chords : colors.text }}>
+              <span className="text-sm font-mono font-bold" style={{ color: controls.transpose !== 0 ? colors.accent : colors.text }}>
                 {controls.transpose > 0 ? '+' : ''}{controls.transpose}
               </span>
               <button
                 onClick={() => controls.onTranspose(-1)}
                 className="w-full flex items-center justify-center py-1.5 cursor-pointer transition-colors"
                 style={{ color: colors.text }}
-                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.accent; }}
                 onMouseLeave={e => { e.currentTarget.style.color = colors.text; }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6" /></svg>
@@ -199,19 +202,19 @@ export default function Sidebar() {
                 onClick={controls.onFitIncrease}
                 className="w-full flex items-center justify-center py-1.5 cursor-pointer transition-colors"
                 style={{ color: colors.text }}
-                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.accent; }}
                 onMouseLeave={e => { e.currentTarget.style.color = colors.text; }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
               </button>
-              <span className="text-sm font-mono font-bold" style={{ color: controls.fitScale ? colors.chords : colors.text }}>
+              <span className="text-sm font-mono font-bold" style={{ color: controls.fitScale ? colors.accent : colors.text }}>
                 {controls.fitScale ? `${Math.round(controls.fitScale * 100)}` : '—'}
               </span>
               <button
                 onClick={controls.onFitDecrease}
                 className="w-full flex items-center justify-center py-1.5 cursor-pointer transition-colors"
                 style={{ color: colors.text }}
-                onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
+                onMouseEnter={e => { e.currentTarget.style.color = colors.accent; }}
                 onMouseLeave={e => { e.currentTarget.style.color = colors.text; }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /></svg>
@@ -221,10 +224,10 @@ export default function Sidebar() {
             <button
               onClick={controls.onColumns}
               className="w-full flex items-center justify-center py-3 cursor-pointer transition-colors"
-              style={{ color: controls.columns > 1 ? colors.chords : colors.text, borderTop: `1px solid ${colors.border}` }}
+              style={{ color: controls.columns > 1 ? colors.accent : colors.text, borderTop: `1px solid ${colors.border}` }}
               title={`Колонки: ${controls.columns || 1}`}
-              onMouseEnter={e => { e.currentTarget.style.color = colors.chords; }}
-              onMouseLeave={e => { e.currentTarget.style.color = controls.columns > 1 ? colors.chords : colors.text; }}
+              onMouseEnter={e => { e.currentTarget.style.color = colors.accent; }}
+              onMouseLeave={e => { e.currentTarget.style.color = controls.columns > 1 ? colors.accent : colors.text; }}
             >
               <span className="text-sm font-bold">{controls.columns || 1}</span>
             </button>
@@ -295,7 +298,7 @@ export default function Sidebar() {
             to="/"
             onClick={() => { setStatusFilter('all'); setSelectedArtist(null); setSearchQuery(''); setSearchOpen(false); handleNavClick(); }}
             className="flex items-center justify-between w-full text-sm font-medium"
-            style={{ color: location.pathname === '/' ? colors.chords : colors.text }}
+            style={{ color: location.pathname === '/' ? colors.accent : colors.text }}
           >
             <span>Все песни</span>
             <span style={{ color: colors.textMuted }}>{songs.length}</span>
@@ -312,9 +315,9 @@ export default function Sidebar() {
                 onClick={() => applyFilter('status', key)}
                 className="px-2 py-0.5 rounded-full text-xs font-medium transition-colors"
                 style={{
-                  backgroundColor: statusFilter === key ? colors.chords : 'transparent',
+                  backgroundColor: statusFilter === key ? colors.accent : 'transparent',
                   color: statusFilter === key ? colors.bg : colors.textMuted,
-                  border: `1px solid ${statusFilter === key ? colors.chords : colors.border}`,
+                  border: `1px solid ${statusFilter === key ? colors.accent : colors.border}`,
                 }}
               >
                 {label}
@@ -339,7 +342,7 @@ export default function Sidebar() {
                 onClick={() => { setSelectedArtist(null); const p = new URLSearchParams(location.search); p.delete('artist'); const qs = p.toString(); navigate(`/${qs ? '?' + qs : ''}`, { replace: true }); }}
                 className="flex items-center justify-between w-full px-2 py-1 rounded text-xs"
                 style={{
-                  backgroundColor: !selectedArtist ? colors.chords : 'transparent',
+                  backgroundColor: !selectedArtist ? colors.accent : 'transparent',
                   color: !selectedArtist ? colors.bg : colors.textMuted,
                 }}
               >
@@ -352,7 +355,7 @@ export default function Sidebar() {
                   onClick={() => applyFilter('artist', name)}
                   className="flex items-center justify-between w-full px-2 py-1 rounded text-xs"
                   style={{
-                    backgroundColor: selectedArtist === name ? colors.chords : 'transparent',
+                    backgroundColor: selectedArtist === name ? colors.accent : 'transparent',
                     color: selectedArtist === name ? colors.bg : colors.textMuted,
                   }}
                 >
@@ -381,7 +384,7 @@ export default function Sidebar() {
                   || location.pathname === `/setlist/${sl.id}`;
                 return (
                 <div key={sl.id} className="flex items-center gap-1 px-2 py-1 rounded text-xs group"
-                  style={{ backgroundColor: isActive ? colors.chords : 'transparent' }}
+                  style={{ backgroundColor: isActive ? colors.accent : 'transparent' }}
                 >
                   <Link
                     to={`/setlist/${sl.id}`}
@@ -417,7 +420,7 @@ export default function Sidebar() {
                   to="/admin/setlists/new"
                   onClick={handleNavClick}
                   className="flex items-center gap-1 px-2 py-1 rounded text-xs mt-1"
-                  style={{ color: colors.chords }}
+                  style={{ color: colors.accent }}
                 >
                   <IconPlus /> Новый сет-лист
                 </Link>
@@ -429,7 +432,7 @@ export default function Sidebar() {
         {/* Admin actions */}
         {isAdmin && (
           <div className="px-3 py-2 space-y-1" style={{ borderBottom: `1px solid ${colors.border}` }}>
-            <Link to="/admin/songs/new" onClick={handleNavClick} className="flex items-center gap-2 px-2 py-1 rounded text-sm" style={{ color: colors.chords }}>
+            <Link to="/admin/songs/new" onClick={handleNavClick} className="flex items-center gap-2 px-2 py-1 rounded text-sm" style={{ color: colors.accent }}>
               <IconPlus /> Добавить песню
             </Link>
             <Link to="/admin/import" onClick={handleNavClick} className="flex items-center gap-2 px-2 py-1 rounded text-sm" style={{ color: colors.textMuted }}>
@@ -572,8 +575,8 @@ export default function Sidebar() {
                       }}
                       className="px-2 py-0.5 rounded text-xs cursor-pointer"
                       style={{
-                        color: (settings.chordStyle || 'none') !== 'none' ? colors.chords : colors.textMuted,
-                        border: `1px solid ${(settings.chordStyle || 'none') !== 'none' ? colors.chords : colors.border}`,
+                        color: (settings.chordStyle || 'none') !== 'none' ? colors.accent : colors.textMuted,
+                        border: `1px solid ${(settings.chordStyle || 'none') !== 'none' ? colors.accent : colors.border}`,
                       }}
                     >
                       {{ none: 'Нет', bg: 'Фон', border: 'Рамка', both: 'Фон+Рамка' }[settings.chordStyle || 'none']}
@@ -624,7 +627,7 @@ export default function Sidebar() {
                   <button
                     onClick={controls.fitScale ? controls.onFitReset : controls.onAutoFit}
                     className="px-3 py-1 rounded text-sm font-medium cursor-pointer"
-                    style={{ backgroundColor: controls.fitScale ? colors.chords : colors.bg, color: controls.fitScale ? colors.bg : colors.textMuted, border: `1px solid ${controls.fitScale ? colors.chords : colors.border}` }}
+                    style={{ backgroundColor: controls.fitScale ? colors.accent : colors.bg, color: controls.fitScale ? colors.bg : colors.textMuted, border: `1px solid ${controls.fitScale ? colors.accent : colors.border}` }}
                   >{controls.fitScale ? `${Math.round(controls.fitScale * 100)}%` : 'Авто'}</button>
                   <button onClick={controls.onFitIncrease} className="px-3 py-1 rounded font-mono text-sm cursor-pointer" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}>+</button>
                 </div>
@@ -634,7 +637,7 @@ export default function Sidebar() {
                   <button
                     onClick={controls.onColumns}
                     className="px-3 py-1 rounded text-sm font-medium cursor-pointer"
-                    style={{ backgroundColor: colors.bg, color: controls.columns > 1 ? colors.chords : colors.textMuted, border: `1px solid ${controls.columns > 1 ? colors.chords : colors.border}` }}
+                    style={{ backgroundColor: colors.bg, color: controls.columns > 1 ? colors.accent : colors.textMuted, border: `1px solid ${controls.columns > 1 ? colors.accent : colors.border}` }}
                   >
                     {controls.columns > 1 ? `${controls.columns} колонки` : '1 колонка'}
                   </button>
@@ -644,7 +647,7 @@ export default function Sidebar() {
                   <button
                     onClick={controls.onScrollToggle}
                     className="px-3 py-1 rounded text-sm font-medium cursor-pointer"
-                    style={{ backgroundColor: controls.scrollOn ? '#4caf50' : colors.bg, color: controls.scrollOn ? '#fff' : colors.textMuted, border: `1px solid ${controls.scrollOn ? '#4caf50' : colors.border}` }}
+                    style={{ backgroundColor: controls.scrollOn ? colors.accent : colors.bg, color: controls.scrollOn ? colors.bg : colors.textMuted, border: `1px solid ${controls.scrollOn ? colors.accent : colors.border}` }}
                   >{controls.scrollOn ? 'Стоп' : 'Прокрутка'}</button>
                   {controls.scrollOn && (
                     <input type="range" min="0" max="100" value={controls.scrollSpeed} onChange={e => controls.onScrollSpeed(+e.target.value)} className="flex-1" />

@@ -197,7 +197,7 @@ export default function SongView() {
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="2.5">
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </div>
@@ -214,7 +214,7 @@ export default function SongView() {
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.chords} strokeWidth="2.5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="2.5">
                 <path d="M9 18l6-6-6-6" />
               </svg>
             </div>

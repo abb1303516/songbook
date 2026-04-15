@@ -128,7 +128,7 @@ export default function SongEditor() {
             onClick={handleSave}
             disabled={saving || !title.trim()}
             className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-            style={{ backgroundColor: colors.chords, color: colors.bg }}
+            style={{ backgroundColor: colors.accent, color: colors.bg }}
           >
             {saving ? '...' : 'Сохранить'}
           </button>
@@ -136,9 +136,9 @@ export default function SongEditor() {
             onClick={() => setShowPreview(!showPreview)}
             className="px-3 py-2 rounded-lg text-sm font-medium"
             style={{
-              backgroundColor: showPreview ? colors.chords : colors.bg,
+              backgroundColor: showPreview ? colors.accent : colors.bg,
               color: showPreview ? colors.bg : colors.textMuted,
-              border: `1px solid ${showPreview ? colors.chords : colors.border}`,
+              border: `1px solid ${showPreview ? colors.accent : colors.border}`,
             }}
           >
             {showPreview ? 'Редактор' : 'Превью'}

@@ -135,7 +135,7 @@ export default function SetlistEditor() {
               onClick={handleSave}
               disabled={saving || !name.trim()}
               className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 cursor-pointer"
-              style={{ backgroundColor: colors.chords, color: colors.bg }}
+              style={{ backgroundColor: colors.accent, color: colors.bg }}
             >
               {saving ? '...' : 'Сохранить'}
             </button>
@@ -148,7 +148,7 @@ export default function SetlistEditor() {
                 onClick={() => setShowAll(true)}
                 className="px-3 py-1 text-xs font-medium cursor-pointer"
                 style={{
-                  backgroundColor: showAll ? colors.chords : 'transparent',
+                  backgroundColor: showAll ? colors.accent : 'transparent',
                   color: showAll ? colors.bg : colors.textMuted,
                 }}
               >
@@ -158,7 +158,7 @@ export default function SetlistEditor() {
                 onClick={() => setShowAll(false)}
                 className="px-3 py-1 text-xs font-medium cursor-pointer"
                 style={{
-                  backgroundColor: !showAll ? colors.chords : 'transparent',
+                  backgroundColor: !showAll ? colors.accent : 'transparent',
                   color: !showAll ? colors.bg : colors.textMuted,
                 }}
               >

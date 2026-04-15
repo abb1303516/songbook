@@ -71,7 +71,7 @@ export default function SongMenu({ songId, songStatus, onStatusChange }) {
                 setOpen(false);
               }}
               className="block w-full text-left px-3 py-1.5 text-xs cursor-pointer hover:opacity-80"
-              style={{ color: status === s ? colors.chords : colors.text }}
+              style={{ color: status === s ? colors.accent : colors.text }}
             >
               {status === s ? '✓ ' : '  '}{STATUS_LABELS[s]}
             </button>
@@ -99,7 +99,7 @@ export default function SongMenu({ songId, songStatus, onStatusChange }) {
                       setOpen(false);
                     }}
                     className="block w-full text-left px-3 py-1.5 text-xs cursor-pointer hover:opacity-80"
-                    style={{ color: inList ? colors.chords : colors.text }}
+                    style={{ color: inList ? colors.accent : colors.text }}
                   >
                     {inList ? '✓ ' : '  '}{sl.name}
                   </button>
