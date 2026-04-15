@@ -233,6 +233,7 @@ export default function SongView() {
             useH={settings.useH}
             colors={colors}
             columns={localSongSettings.columns || 1}
+            chordStyle={settings.chordStyle || 'none'}
           />
         </div>
         </div>

@@ -12,6 +12,7 @@ export default function SongContent({
   useH = false,
   colors = {},
   columns = 1,
+  chordStyle = 'none',
 }) {
   const { sections } = useMemo(() => parseChordPro(chordpro || ''), [chordpro]);
 
@@ -68,6 +69,7 @@ export default function SongContent({
                 chordColor={chordColor}
                 fontSize={fontSize}
                 useH={useH}
+                chordStyle={chordStyle}
               />
             ))}
           </div>

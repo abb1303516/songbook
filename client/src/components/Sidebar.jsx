@@ -559,6 +559,25 @@ export default function Sidebar() {
                     <input type="checkbox" checked={settings.showChords} onChange={e => updateSettings({ showChords: e.target.checked })} className="w-3.5 h-3.5" />
                     <span className="text-xs">Показывать аккорды</span>
                   </label>
+                  {/* Chord style */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: colors.textMuted }}>Стиль аккордов</span>
+                    <button
+                      onClick={() => {
+                        const cycle = ['none', 'bg', 'border', 'both'];
+                        const cur = settings.chordStyle || 'none';
+                        const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
+                        updateSettings({ chordStyle: next });
+                      }}
+                      className="px-2 py-0.5 rounded text-xs cursor-pointer"
+                      style={{
+                        color: (settings.chordStyle || 'none') !== 'none' ? colors.chords : colors.textMuted,
+                        border: `1px solid ${(settings.chordStyle || 'none') !== 'none' ? colors.chords : colors.border}`,
+                      }}
+                    >
+                      {{ none: 'Нет', bg: 'Фон', border: 'Рамка', both: 'Фон+Рамка' }[settings.chordStyle || 'none']}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

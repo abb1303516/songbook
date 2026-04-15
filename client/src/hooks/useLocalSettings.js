@@ -61,6 +61,7 @@ const SERVER_DEFAULTS = {
   lineHeight: 1.4,
   showChords: true,
   useH: true,
+  chordStyle: 'none', // 'none' | 'bg' | 'border' | 'both'
 };
 
 // Per-device settings (localStorage only)
@@ -113,8 +114,8 @@ export function useLocalSettings() {
   const saveToServer = useCallback((newSettings) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      const { customThemes, fontSize, lineHeight, showChords, useH } = newSettings;
-      saveSettingsApi({ customThemes, fontSize, lineHeight, showChords, useH }).catch(() => {});
+      const { customThemes, fontSize, lineHeight, showChords, useH, chordStyle } = newSettings;
+      saveSettingsApi({ customThemes, fontSize, lineHeight, showChords, useH, chordStyle }).catch(() => {});
     }, 500);
   }, []);
 
