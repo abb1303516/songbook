@@ -7,6 +7,7 @@ const THEMES = {
   dark: {
     text: '#e0e0e0',
     chords: '#6bb3ff',
+    chordBg: 'transparent',
     bg: '#1a1a2e',
     surface: '#22223a',
     border: '#2c2c44',
@@ -19,6 +20,7 @@ const THEMES = {
   light: {
     text: '#1a1a1a',
     chords: '#2563eb',
+    chordBg: 'transparent',
     bg: '#fafafa',
     surface: '#ffffff',
     border: '#d8d4ca',
@@ -31,6 +33,7 @@ const THEMES = {
   contrast: {
     text: '#ffffff',
     chords: '#ffcc00',
+    chordBg: 'transparent',
     bg: '#000000',
     surface: '#111111',
     border: '#333333',
@@ -43,6 +46,7 @@ const THEMES = {
   warm: {
     text: '#e8dcc8',
     chords: '#d4956a',
+    chordBg: 'transparent',
     bg: '#2d2418',
     surface: '#382e20',
     border: '#4a3c2a',

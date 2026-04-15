@@ -3,19 +3,19 @@ import { transposeChord, chordToH } from '../utils/transpose';
 const MONO_FONT = "'Source Code Pro', 'Fira Mono', 'Courier New', monospace";
 
 // chordStyle: 'none' | 'bg' | 'border' | 'both'
-export default function SongLine({ pairs, transpose = 0, showChords = true, chordColor, fontSize, useH = false, chordStyle = 'none' }) {
+export default function SongLine({ pairs, transpose = 0, showChords = true, chordColor, chordBg, fontSize, useH = false, chordStyle = 'none' }) {
   const chordSpanStyle = {};
   if (chordStyle === 'bg' || chordStyle === 'both') {
-    chordSpanStyle.backgroundColor = chordColor + '22'; // ~13% opacity
-    chordSpanStyle.borderRadius = '2px';
+    const bg = chordBg && chordBg !== 'transparent' ? chordBg : chordColor + '22';
+    chordSpanStyle.backgroundColor = bg;
+    chordSpanStyle.borderRadius = '3px';
     chordSpanStyle.padding = '1px 2px';
-    chordSpanStyle.margin = '0 -2px'; // compensate horizontal padding
+    chordSpanStyle.margin = '0 -2px';
   }
   if (chordStyle === 'border' || chordStyle === 'both') {
-    chordSpanStyle.border = `1px solid ${chordColor}44`;
+    chordSpanStyle.border = `1px solid ${chordBg && chordBg !== 'transparent' ? chordColor + '66' : chordColor + '44'}`;
     chordSpanStyle.borderRadius = '3px';
-    chordSpanStyle.padding = '0px 2px';
-    chordSpanStyle.margin = '0 -2px';
+    if (!chordSpanStyle.padding) { chordSpanStyle.padding = '0px 2px'; chordSpanStyle.margin = '0 -2px'; }
   }
   const hasStyle = chordStyle !== 'none';
 

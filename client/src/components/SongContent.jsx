@@ -67,6 +67,7 @@ export default function SongContent({
                 transpose={transpose}
                 showChords={showChords}
                 chordColor={chordColor}
+                chordBg={colors.chordBg}
                 fontSize={fontSize}
                 useH={useH}
                 chordStyle={chordStyle}

@@ -16,7 +16,8 @@ const THEME_LABELS = { dark: 'Тёмная', light: 'Светлая', contrast: 
 const COLOR_LABELS = [
   { key: 'text', label: 'Текст' },
   { key: 'textMuted', label: 'Второстепенный текст' },
-  { key: 'chords', label: 'Аккорды' },
+  { key: 'chords', label: 'Аккорды (шрифт)' },
+  { key: 'chordBg', label: 'Аккорды (фон)' },
   { key: 'bg', label: 'Фон' },
   { key: 'surface', label: 'Фон sidebar/заголовков' },
   { key: 'border', label: 'Разделители' },
