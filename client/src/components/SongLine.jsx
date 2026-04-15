@@ -9,13 +9,13 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
     const bg = chordBg && chordBg !== 'transparent' ? chordBg : chordColor + '22';
     chordSpanStyle.backgroundColor = bg;
     chordSpanStyle.borderRadius = '3px';
-    chordSpanStyle.padding = '1px 2px';
-    chordSpanStyle.margin = '0 -2px';
+    chordSpanStyle.padding = '2px 4px';
+    chordSpanStyle.margin = '0 -4px';
   }
   if (chordStyle === 'border' || chordStyle === 'both') {
     chordSpanStyle.border = `1px solid ${chordBg && chordBg !== 'transparent' ? chordColor + '66' : chordColor + '44'}`;
     chordSpanStyle.borderRadius = '3px';
-    if (!chordSpanStyle.padding) { chordSpanStyle.padding = '0px 2px'; chordSpanStyle.margin = '0 -2px'; }
+    if (!chordSpanStyle.padding) { chordSpanStyle.padding = '1px 4px'; chordSpanStyle.margin = '0 -4px'; }
   }
   const hasStyle = chordStyle !== 'none';
 
