@@ -36,6 +36,16 @@ export async function updateSong(id, data) {
   return res.json();
 }
 
+export async function updateSongStatus(id, status) {
+  const res = await fetch(`${API}/songs/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error);
+  return res.json();
+}
+
 export async function deleteSong(id) {
   const res = await fetch(`${API}/songs/${id}`, {
     method: 'DELETE',

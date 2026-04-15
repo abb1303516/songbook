@@ -3,13 +3,13 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useSongs } from '../context/SongsContext';
 import { useSettings } from '../context/SettingsContext';
 import { useAdmin } from '../context/AdminContext';
-import { updateSong, updateSetlist } from '../api/songs';
+import { updateSongStatus, updateSetlist } from '../api/songs';
 import { chordToH, transposeKey } from '../utils/transpose';
 
 const STATUS_LABELS = { new: 'Новые', learning: 'Учу', known: 'Знаю' };
 
 export default function SongList() {
-  const { songs, setlists, loading, reload } = useSongs();
+  const { songs, setlists, loading, reload, setNavList } = useSongs();
   const { settings, getSongSettings } = useSettings();
   const { colors } = settings;
   const { isAdmin } = useAdmin();
@@ -62,6 +62,11 @@ export default function SongList() {
     });
     return list;
   }, [songs, qFilter, statusFilter, artistFilter, sortCol, sortAsc]);
+
+  // Keep nav list in sync with current filtered view
+  useEffect(() => {
+    setNavList(filtered.map(s => s.id));
+  }, [filtered, setNavList]);
 
   const handleSort = (col) => {
     if (sortCol === col) setSortAsc(!sortAsc);
@@ -178,7 +183,7 @@ export default function SongList() {
                         const cycle = ['new', 'learning', 'known'];
                         const next = cycle[(cycle.indexOf(status) + 1) % cycle.length];
                         try {
-                          await updateSong(song.id, { status: next });
+                          await updateSongStatus(song.id, next);
                           reload();
                         } catch (err) { /* ignore */ }
                       }}

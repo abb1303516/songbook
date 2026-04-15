@@ -53,6 +53,19 @@ export default {
     res.json(rows[0]);
   },
 
+  async updateStatus(req, res) {
+    const { status } = req.body;
+    if (!['new', 'learning', 'known'].includes(status)) {
+      return res.status(400).json({ error: 'Недопустимый статус' });
+    }
+    const { rows } = await pool.query(
+      'UPDATE songs SET status = $2, updated_at = NOW() WHERE id = $1 RETURNING id, status',
+      [req.params.id, status]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Песня не найдена' });
+    res.json(rows[0]);
+  },
+
   async remove(req, res) {
     const { rowCount } = await pool.query('DELETE FROM songs WHERE id = $1', [req.params.id]);
     if (!rowCount) return res.status(404).json({ error: 'Песня не найдена' });

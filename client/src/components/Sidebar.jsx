@@ -309,13 +309,18 @@ export default function Sidebar() {
           </button>
           {setlistsOpen && (
             <div className="mt-1.5 space-y-0.5 max-h-48 overflow-y-auto">
-              {setlists.map(sl => (
-                <div key={sl.id} className="flex items-center gap-1 px-2 py-1 rounded text-xs group">
+              {setlists.map(sl => {
+                const isActive = new URLSearchParams(location.search).get('setlist') === sl.id
+                  || location.pathname === `/setlist/${sl.id}`;
+                return (
+                <div key={sl.id} className="flex items-center gap-1 px-2 py-1 rounded text-xs group"
+                  style={{ backgroundColor: isActive ? colors.chords : 'transparent' }}
+                >
                   <Link
                     to={`/setlist/${sl.id}`}
                     onClick={handleNavClick}
                     className="flex-1 truncate"
-                    style={{ color: colors.textMuted }}
+                    style={{ color: isActive ? colors.bg : colors.textMuted }}
                   >
                     {sl.name}
                   </Link>
@@ -335,7 +340,8 @@ export default function Sidebar() {
                     </Link>
                   )}
                 </div>
-              ))}
+              );
+              })}
               {setlists.length === 0 && (
                 <div className="text-xs px-2 py-1" style={{ color: colors.textMuted }}>Пусто</div>
               )}

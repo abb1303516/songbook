@@ -7,6 +7,8 @@ export function SongsProvider({ children }) {
   const [songs, setSongs] = useState([]);
   const [setlists, setSetlists] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Navigation context: ordered list of song IDs for prev/next in SongView
+  const [navList, setNavList] = useState([]);
 
   const reload = useCallback(() => {
     setLoading(true);
@@ -18,7 +20,7 @@ export function SongsProvider({ children }) {
   useEffect(() => { reload(); }, [reload]);
 
   return (
-    <SongsContext.Provider value={{ songs, setSongs, setlists, setSetlists, loading, reload }}>
+    <SongsContext.Provider value={{ songs, setSongs, setlists, setSetlists, loading, reload, navList, setNavList }}>
       {children}
     </SongsContext.Provider>
   );

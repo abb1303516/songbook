@@ -33,6 +33,7 @@ app.get('/api/songs/:id', songsRouter.get);
 app.get('/api/setlists', setlistsRouter.list);
 app.get('/api/setlists/:id', setlistsRouter.get);
 app.get('/api/export', exportRouter.exportAll);
+app.put('/api/songs/:id/status', songsRouter.updateStatus);
 
 // Admin routes
 app.post('/api/admin/verify', adminRouter.verify);

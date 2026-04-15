@@ -7,7 +7,7 @@ import { SongControlsProvider } from './context/SongControlsContext';
 import AppLayout from './components/AppLayout';
 import SongList from './pages/SongList';
 import SongView from './pages/SongView';
-import SetlistView from './pages/SetlistView';
+import SetlistRedirect from './pages/SetlistRedirect';
 import Admin from './pages/Admin';
 import SongEditor from './pages/SongEditor';
 import SetlistEditor from './pages/SetlistEditor';
@@ -25,7 +25,7 @@ export default function App() {
                   {/* Public */}
                   <Route path="/" element={<SongList />} />
                   <Route path="/song/:id" element={<SongView />} />
-                  <Route path="/setlist/:id" element={<SetlistView />} />
+                  <Route path="/setlist/:id" element={<SetlistRedirect />} />
 
                   {/* Admin (password-protected) */}
                   <Route path="/admin" element={<Admin />}>
