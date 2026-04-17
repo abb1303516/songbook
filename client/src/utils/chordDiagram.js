@@ -68,12 +68,16 @@ export function parseChord(chord) {
   return { root, suffix, bass: bass ? normalizeRoot(bass) : null };
 }
 
-// Normalize position: if all active frets >= 2 and baseFret = 1, shift so lowest active fret becomes 1 and baseFret shows the actual fret number
+// Normalize position: if all fretted notes >= 2 (NO open strings) and baseFret = 1,
+// shift so lowest fretted becomes 1 and baseFret shows the actual fret.
+// If any string is open (fret === 0), keep baseFret=1 with the nut line.
 function normalizePosition(pos) {
   if (pos.baseFret !== 1) return pos;
-  const activeFrets = pos.frets.filter(f => f > 0);
-  if (activeFrets.length === 0) return pos;
-  const minFret = Math.min(...activeFrets);
+  const hasOpen = pos.frets.some(f => f === 0);
+  if (hasOpen) return pos; // open strings need the nut — don't shift
+  const fretted = pos.frets.filter(f => f > 0);
+  if (fretted.length === 0) return pos;
+  const minFret = Math.min(...fretted);
   if (minFret < 2) return pos;
   const shift = minFret - 1;
   return {

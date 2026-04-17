@@ -62,7 +62,8 @@ function ChordCard({ chordName, colors }) {
             style={{
               color: colors.textMuted,
               left: 0,
-              top: '7%',
+              top: '9.3%',
+              transform: 'translateY(-50%)',
               lineHeight: 1,
               fontSize: '0.8em',
             }}
