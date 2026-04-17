@@ -26,16 +26,32 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
     let chord = p.chord ? transposeChord(p.chord, transpose) : '';
     if (useH && chord) chord = chordToH(chord);
 
-    // Split text into [whitespace, word, whitespace, word...] keeping separators
-    const tokens = p.text.match(/(\s+|\S+)/g) || [p.text];
+    // If pair has chord but no text — render as standalone inline-block with chord
+    if (chord && !p.text) {
+      return (
+        <span key={pairIdx} style={{ display: 'inline-block', verticalAlign: 'top' }}>
+          {showChordRow && (
+            <span
+              className="font-semibold select-none"
+              style={{ color: chordColor, display: 'block', whiteSpace: 'pre', minHeight: '1em' }}
+            >
+              <span style={chordSpanStyle}>{chord}</span>
+            </span>
+          )}
+          <span>&nbsp;</span>
+        </span>
+      );
+    }
+
+    // Split text into tokens (words and whitespace)
+    const tokens = p.text.match(/(\s+|\S+)/g) || [];
     let firstWordRendered = false;
 
-    return tokens.map((token, ti) => {
+    const elements = tokens.map((token, ti) => {
       const isWord = /\S/.test(token);
       const key = `${pairIdx}-${ti}`;
 
       if (!isWord) {
-        // Whitespace: render as regular text node so wrap can happen here
         return <span key={key} style={{ whiteSpace: 'pre-wrap' }}>{token}</span>;
       }
 
@@ -56,6 +72,25 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
         </span>
       );
     });
+
+    // If chord exists but no word rendered (e.g. all whitespace text) — show chord standalone
+    if (chord && !firstWordRendered) {
+      elements.unshift(
+        <span key={`${pairIdx}-chord`} style={{ display: 'inline-block', verticalAlign: 'top' }}>
+          {showChordRow && (
+            <span
+              className="font-semibold select-none"
+              style={{ color: chordColor, display: 'block', whiteSpace: 'pre', minHeight: '1em' }}
+            >
+              <span style={chordSpanStyle}>{chord}</span>
+            </span>
+          )}
+          <span>&nbsp;</span>
+        </span>
+      );
+    }
+
+    return elements;
   };
 
   return (
