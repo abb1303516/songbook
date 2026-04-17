@@ -68,6 +68,22 @@ export function parseChord(chord) {
   return { root, suffix, bass: bass ? normalizeRoot(bass) : null };
 }
 
+// Normalize position: if all active frets >= 2 and baseFret = 1, shift so lowest active fret becomes 1 and baseFret shows the actual fret number
+function normalizePosition(pos) {
+  if (pos.baseFret !== 1) return pos;
+  const activeFrets = pos.frets.filter(f => f > 0);
+  if (activeFrets.length === 0) return pos;
+  const minFret = Math.min(...activeFrets);
+  if (minFret < 2) return pos;
+  const shift = minFret - 1;
+  return {
+    ...pos,
+    baseFret: minFret,
+    frets: pos.frets.map(f => f > 0 ? f - shift : f),
+    barres: (pos.barres || []).map(b => b - shift),
+  };
+}
+
 // Find chord in chords-db. Returns { key, suffix, positions } or null
 export function findChord(chordStr) {
   const parsed = parseChord(chordStr);
@@ -79,7 +95,8 @@ export function findChord(chordStr) {
   if (!keyChords) return null;
   const entry = keyChords.find(c => c.suffix === suffix);
   if (!entry) return null;
-  return { key, suffix, positions: entry.positions, displayName: chordStr };
+  const positions = entry.positions.map(normalizePosition);
+  return { key, suffix, positions, displayName: chordStr };
 }
 
 // Guitar config for react-chords component
