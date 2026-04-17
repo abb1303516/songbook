@@ -39,7 +39,7 @@ function ChordCard({ chordName, colors }) {
       <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
       <div
         className="chord-diagram"
-        style={{ width: 80, '--chord-diagram-color': colors.text }}
+        style={{ width: '100%', '--chord-diagram-color': colors.text }}
       >
         <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
       </div>
@@ -61,9 +61,8 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
   const [playerOpen, setPlayerOpen] = useState(true);
   const resizingRef = useRef(false);
 
-  // Resize handler (desktop only)
+  // Resize: attach listeners on mount, check ref inside
   useEffect(() => {
-    if (!resizingRef.current) return;
     const onMove = (e) => {
       if (!resizingRef.current) return;
       const newWidth = window.innerWidth - e.clientX;
@@ -76,7 +75,7 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
     };
-  });
+  }, [setWidth]);
 
   const startResize = (e) => {
     e.preventDefault();
@@ -150,7 +149,10 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
               </svg>
             </button>
             {chordsOpen && uniqueChords.length > 0 && (
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div
+                className="gap-2 mt-2"
+                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))' }}
+              >
                 {uniqueChords.map((c, i) => (
                   <ChordCard key={`${c}-${i}`} chordName={c} colors={colors} />
                 ))}
