@@ -9,7 +9,6 @@ export default function AppLayout() {
   const { colors } = settings;
 
   const marginLeft = isMobile ? 0 : (isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED);
-  const paddingLeft = isMobile && !isOpen ? 40 : 0; // space for hamburger
 
   return (
     <div className="h-screen flex overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
@@ -45,7 +44,6 @@ export default function AppLayout() {
         className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden"
         style={{
           marginLeft,
-          paddingLeft,
           transition: 'margin-left 0.2s ease',
         }}
       >

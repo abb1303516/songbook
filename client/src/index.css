@@ -38,9 +38,27 @@ body {
 .gallery-arrow {
   opacity: 0;
   transition: opacity 0.15s ease;
-  pointer-events: auto;
 }
 .gallery-arrow:hover {
   opacity: 1;
+}
+/* Hide on mobile — arrows block swipe/scroll */
+@media (max-width: 768px) {
+  .gallery-arrow {
+    display: none;
+  }
+}
+
+/* Enable smooth touch scrolling */
+.scrollable {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Mobile: space for floating hamburger in page headers */
+@media (max-width: 768px) {
+  header {
+    padding-left: 44px !important;
+  }
 }
 

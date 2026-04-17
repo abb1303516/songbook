@@ -27,12 +27,14 @@ export default function SongView() {
 
   // Transpose from song (server), fontSize/lineHeight from settings (server), fitScale from local
   const transpose = song?.transpose || 0;
-  const { fontSize, lineHeight } = settings;
+  const { fontSize } = settings;
   const localSongSettings = getSongSettings(id);
   const { fitScale } = localSongSettings;
+  // lineHeight: per-song per-device, fallback to global
+  const lineHeight = localSongSettings.lineHeight ?? settings.lineHeight ?? 1.4;
 
   const effectiveFontSize = fitScale ? Math.max(Math.round(fontSize * fitScale), 8) : fontSize;
-  const effectiveLineHeight = fitScale ? Math.max(+(lineHeight * fitScale).toFixed(2), 1.0) : lineHeight;
+  const effectiveLineHeight = fitScale ? Math.max(+(lineHeight * fitScale).toFixed(2), 0.7) : lineHeight;
 
   // Load song data
   useEffect(() => {
@@ -116,7 +118,7 @@ export default function SongView() {
         updateSongTranspose(id, newT).catch(() => {});
       },
       onFontSize: (val) => updateSettings({ fontSize: val }),
-      onLineHeight: (val) => updateSettings({ lineHeight: val }),
+      onLineHeight: (val) => updateSongSettings(id, { lineHeight: val }),
       onAutoFit: autoFit,
       onFitReset: resetFit,
       onFitIncrease: () => adjustFit(FIT_STEP),
