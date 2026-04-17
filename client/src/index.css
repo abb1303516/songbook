@@ -42,8 +42,8 @@ body {
 .gallery-arrow:hover {
   opacity: 1;
 }
-/* Hide on mobile — arrows block swipe/scroll */
-@media (max-width: 768px) {
+/* Hide on touch devices — arrows block swipe/scroll. Swipe works everywhere. */
+@media (hover: none), (pointer: coarse) {
   .gallery-arrow {
     display: none;
   }
