@@ -69,15 +69,21 @@ body {
 .chord-diagram svg [stroke="#444"] {
   stroke: var(--chord-diagram-color, #e0e0e0);
 }
+/* Fret label + tuning notes — bigger, bold */
 .chord-diagram svg text {
-  fill: var(--chord-diagram-color, #e0e0e0);
   font-size: 5px !important;
   font-weight: bold;
 }
-/* "X" muted strings and labels — white means "open", keep it, but on dark bg need subtle contrast */
-.chord-diagram svg [fill="white"] {
+/* Tuning notes and "x" markers inherit theme color (they had fill="#444") */
+/* Finger numbers inside dots: white → bg color for contrast on dark theme */
+.chord-diagram svg text[fill="white"] {
+  fill: var(--chord-diagram-bg, #1a1a2e);
+  font-size: 4px !important;
+}
+/* Open string "O" circles (fill="white") — outline instead */
+.chord-diagram svg circle[fill="white"] {
   fill: transparent;
   stroke: var(--chord-diagram-color, #e0e0e0);
-  stroke-width: 0.3;
+  stroke-width: 0.4;
 }
 

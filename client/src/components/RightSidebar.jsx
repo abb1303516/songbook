@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import Chord from '@tombatossals/react-chords/lib/Chord';
 import { useRightSidebar, MIN_RIGHT_WIDTH, MAX_RIGHT_WIDTH, MIN_CHORD_SIZE, MAX_CHORD_SIZE } from '../context/RightSidebarContext';
 import { useSettings } from '../context/SettingsContext';
@@ -16,6 +16,18 @@ const IconClose = () => (
 function ChordCard({ chordName, colors }) {
   const [posIdx, setPosIdx] = useState(0);
   const entry = useMemo(() => findChord(chordName), [chordName]);
+  const wrapRef = useRef(null);
+
+  // Strip "fr" suffix from fret label
+  useLayoutEffect(() => {
+    if (!wrapRef.current) return;
+    const texts = wrapRef.current.querySelectorAll('svg text');
+    texts.forEach(t => {
+      if (t.textContent && /^\d+fr$/.test(t.textContent)) {
+        t.textContent = t.textContent.replace(/fr$/, '');
+      }
+    });
+  });
 
   if (!entry) {
     return (
@@ -38,8 +50,13 @@ function ChordCard({ chordName, colors }) {
     >
       <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
       <div
+        ref={wrapRef}
         className="chord-diagram"
-        style={{ width: '100%', '--chord-diagram-color': colors.text }}
+        style={{
+          width: '100%',
+          '--chord-diagram-color': colors.text,
+          '--chord-diagram-bg': colors.bg,
+        }}
       >
         <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
       </div>
