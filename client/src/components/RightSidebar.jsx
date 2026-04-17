@@ -48,8 +48,13 @@ function ChordCard({ chordName, colors }) {
       title={total > 1 ? 'Другой вариант' : ''}
     >
       <div className="font-semibold text-base mb-1" style={{ color: colors.chords }}>{chordName}</div>
-      {/* Wrapper holds SVG (aspect 80/70) and label positioned at barre level */}
+      {/*
+        SVG: viewBox 80×70, inner content translated by (13, 13).
+        Barre line (first fret) at SVG y = 13 + 6.5 = 19.5 → 19.5/70 ≈ 27.86% from top.
+        Label positioned on left, aligned with barre.
+      */}
       <div className="flex w-full items-start">
+        {pos.baseFret > 1 && <div style={{ width: '1.2em', flexShrink: 0 }} />}
         <div className="relative" style={{ flex: 1, aspectRatio: '80 / 70' }}>
           <div
             ref={wrapRef}
@@ -66,12 +71,12 @@ function ChordCard({ chordName, colors }) {
               className="font-mono font-semibold absolute"
               style={{
                 color: colors.textMuted,
-                left: '100%',
-                top: '9.29%',
+                right: '100%',
+                top: '27.86%',
                 transform: 'translateY(-50%)',
                 fontSize: '0.75em',
                 lineHeight: 1,
-                paddingLeft: 3,
+                paddingRight: 3,
                 whiteSpace: 'nowrap',
               }}
             >
@@ -79,8 +84,6 @@ function ChordCard({ chordName, colors }) {
             </div>
           )}
         </div>
-        {/* Reserve space to the right for the label so it doesn't clip */}
-        {pos.baseFret > 1 && <div style={{ width: '1.2em', flexShrink: 0 }} />}
       </div>
       {total > 1 && (
         <div className="text-xs mt-1" style={{ color: colors.textMuted }}>
