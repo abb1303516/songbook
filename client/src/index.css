@@ -69,7 +69,7 @@ body {
 .chord-diagram svg [stroke="#444"] {
   stroke: var(--chord-diagram-color, #e0e0e0);
 }
-/* Fret label + tuning notes — bigger, bold */
+/* Tuning notes and dots — bigger, bold */
 .chord-diagram svg text {
   font-size: 5px !important;
   font-weight: bold;

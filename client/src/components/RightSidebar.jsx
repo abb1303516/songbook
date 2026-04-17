@@ -18,13 +18,15 @@ function ChordCard({ chordName, colors }) {
   const entry = useMemo(() => findChord(chordName), [chordName]);
   const wrapRef = useRef(null);
 
-  // Strip "fr" suffix from fret label
+  // Hide inner SVG fret label (we show it externally) + strip "fr" as backup
   useLayoutEffect(() => {
     if (!wrapRef.current) return;
     const texts = wrapRef.current.querySelectorAll('svg text');
     texts.forEach(t => {
-      if (t.textContent && /^\d+fr$/.test(t.textContent)) {
-        t.textContent = t.textContent.replace(/fr$/, '');
+      const txt = t.textContent || '';
+      if (/^\d+fr$/.test(txt)) {
+        // Hide the internal label (we render pos.baseFret outside)
+        t.style.display = 'none';
       }
     });
   });
@@ -49,16 +51,24 @@ function ChordCard({ chordName, colors }) {
       title={total > 1 ? 'Другой вариант' : ''}
     >
       <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
-      <div
-        ref={wrapRef}
-        className="chord-diagram"
-        style={{
-          width: '100%',
-          '--chord-diagram-color': colors.text,
-          '--chord-diagram-bg': colors.bg,
-        }}
-      >
-        <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
+      <div className="flex items-start w-full">
+        {/* External fret label (reliable, not dependent on SVG patching) */}
+        <div
+          className="text-xs font-mono pr-1 pt-3 flex-shrink-0"
+          style={{ color: colors.textMuted, minWidth: 14, textAlign: 'right' }}
+        >
+          {pos.baseFret > 1 ? pos.baseFret : ''}
+        </div>
+        <div
+          ref={wrapRef}
+          className="chord-diagram flex-1 min-w-0"
+          style={{
+            '--chord-diagram-color': colors.text,
+            '--chord-diagram-bg': colors.bg,
+          }}
+        >
+          <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
+        </div>
       </div>
       {total > 1 && (
         <div className="text-xs mt-1" style={{ color: colors.textMuted }}>
