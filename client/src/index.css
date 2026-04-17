@@ -42,7 +42,7 @@ body {
 .gallery-arrow:hover {
   opacity: 1;
 }
-/* Hide on touch devices — arrows block swipe/scroll. Swipe works everywhere. */
+/* Hide on touch devices — arrows block swipe. Swipe replaces arrows. */
 @media (hover: none), (pointer: coarse) {
   .gallery-arrow {
     display: none;

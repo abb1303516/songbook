@@ -17,6 +17,10 @@ export default function SongView() {
   const [searchParams] = useSearchParams();
   const [song, setSong] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasTouch] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  });
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const { settings, updateSettings, getSongSettings, updateSongSettings } = useSettings();
@@ -189,8 +193,8 @@ export default function SongView() {
 
       {/* Song content with gallery arrows */}
       <div className="flex-1 relative overflow-hidden">
-        {/* Left arrow — uses CSS hover, positioned outside scroll container */}
-        {hasPrev && (
+        {/* Left arrow — hover zone, hidden on touch devices */}
+        {hasPrev && !hasTouch && (
           <div
             className="gallery-arrow absolute left-0 top-0 bottom-0 w-32 z-10 flex items-center justify-center cursor-pointer"
             onClick={() => goTo(currentIdx - 1)}
@@ -207,7 +211,7 @@ export default function SongView() {
         )}
 
         {/* Right arrow */}
-        {hasNext && (
+        {hasNext && !hasTouch && (
           <div
             className="gallery-arrow absolute right-0 top-0 bottom-0 w-32 z-10 flex items-center justify-center cursor-pointer"
             onClick={() => goTo(currentIdx + 1)}
