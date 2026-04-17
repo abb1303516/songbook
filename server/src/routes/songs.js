@@ -7,7 +7,7 @@ function genId() {
 export default {
   async list(req, res) {
     const { rows } = await pool.query(
-      'SELECT id, title, artist, key, tags, status, transpose, sort_order, created_at FROM songs ORDER BY sort_order, title'
+      'SELECT id, title, artist, key, tags, status, transpose, youtube_urls, sort_order, created_at FROM songs ORDER BY sort_order, title'
     );
     res.json(rows);
   },
@@ -34,7 +34,7 @@ export default {
   },
 
   async update(req, res) {
-    const { title, artist, key, chordpro, tags, sort_order, status } = req.body;
+    const { title, artist, key, chordpro, tags, sort_order, status, youtube_urls } = req.body;
     const { rows } = await pool.query(
       `UPDATE songs SET
          title = COALESCE($2, title),
@@ -44,10 +44,11 @@ export default {
          tags = COALESCE($6, tags),
          sort_order = COALESCE($7, sort_order),
          status = COALESCE($8, status),
+         youtube_urls = COALESCE($9, youtube_urls),
          updated_at = NOW()
        WHERE id = $1
        RETURNING *`,
-      [req.params.id, title, artist, key, chordpro, tags, sort_order, status]
+      [req.params.id, title, artist, key, chordpro, tags, sort_order, status, youtube_urls]
     );
     if (!rows.length) return res.status(404).json({ error: 'Песня не найдена' });
     res.json(rows[0]);
