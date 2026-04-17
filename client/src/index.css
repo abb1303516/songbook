@@ -62,3 +62,20 @@ body {
   }
 }
 
+/* Chord diagrams — override hardcoded #444 from @tombatossals/react-chords */
+.chord-diagram svg [fill="#444"] {
+  fill: var(--chord-diagram-color, #e0e0e0);
+}
+.chord-diagram svg [stroke="#444"] {
+  stroke: var(--chord-diagram-color, #e0e0e0);
+}
+.chord-diagram svg text {
+  fill: var(--chord-diagram-color, #e0e0e0);
+}
+/* "X" muted strings and labels — white means "open", keep it, but on dark bg need subtle contrast */
+.chord-diagram svg [fill="white"] {
+  fill: transparent;
+  stroke: var(--chord-diagram-color, #e0e0e0);
+  stroke-width: 0.3;
+}
+

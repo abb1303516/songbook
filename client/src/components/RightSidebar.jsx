@@ -37,7 +37,10 @@ function ChordCard({ chordName, colors }) {
       title={total > 1 ? 'Другой вариант' : ''}
     >
       <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
-      <div style={{ width: 80, filter: 'invert(var(--chord-invert, 0))' }}>
+      <div
+        className="chord-diagram"
+        style={{ width: 80, '--chord-diagram-color': colors.text }}
+      >
         <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
       </div>
       {total > 1 && (
