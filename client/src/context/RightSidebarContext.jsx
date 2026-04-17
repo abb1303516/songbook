@@ -1,27 +1,26 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const SidebarContext = createContext(null);
-const STORAGE_KEY = 'songbook-sidebar';
-const WIDTH_KEY = 'songbook-sidebar-width';
+const RightSidebarContext = createContext(null);
+const STORAGE_KEY = 'songbook-right-sidebar';
+const WIDTH_KEY = 'songbook-right-sidebar-width';
 
-export const DEFAULT_LEFT_WIDTH = 260;
-export const MIN_LEFT_WIDTH = 200;
-export const MAX_LEFT_WIDTH = 400;
+export const DEFAULT_RIGHT_WIDTH = 280;
+export const MIN_RIGHT_WIDTH = 200;
+export const MAX_RIGHT_WIDTH = 500;
 
-export function SidebarProvider({ children }) {
+export function RightSidebarProvider({ children }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [isOpen, setIsOpen] = useState(() => {
     if (window.innerWidth < 768) return false;
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved !== null ? saved === 'true' : true;
+    return saved === 'true'; // default closed on desktop too
   });
   const [width, setWidth] = useState(() => {
     const saved = localStorage.getItem(WIDTH_KEY);
-    const n = saved ? parseInt(saved, 10) : DEFAULT_LEFT_WIDTH;
-    return Math.min(Math.max(n || DEFAULT_LEFT_WIDTH, MIN_LEFT_WIDTH), MAX_LEFT_WIDTH);
+    const n = saved ? parseInt(saved, 10) : DEFAULT_RIGHT_WIDTH;
+    return Math.min(Math.max(n || DEFAULT_RIGHT_WIDTH, MIN_RIGHT_WIDTH), MAX_RIGHT_WIDTH);
   });
 
-  // Track viewport changes
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)');
     const handler = (e) => {
@@ -44,14 +43,14 @@ export function SidebarProvider({ children }) {
   const close = useCallback(() => setIsOpen(false), []);
 
   return (
-    <SidebarContext.Provider value={{ isOpen, isMobile, toggle, close, width, setWidth }}>
+    <RightSidebarContext.Provider value={{ isOpen, isMobile, toggle, close, width, setWidth }}>
       {children}
-    </SidebarContext.Provider>
+    </RightSidebarContext.Provider>
   );
 }
 
-export function useSidebar() {
-  const ctx = useContext(SidebarContext);
-  if (!ctx) throw new Error('useSidebar must be used within SidebarProvider');
+export function useRightSidebar() {
+  const ctx = useContext(RightSidebarContext);
+  if (!ctx) throw new Error('useRightSidebar must be used within RightSidebarProvider');
   return ctx;
 }

@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { HexColorPicker } from 'react-colorful';
-import { useSidebar } from '../context/SidebarContext';
+import { useSidebar, MIN_LEFT_WIDTH, MAX_LEFT_WIDTH } from '../context/SidebarContext';
 import { useSongs } from '../context/SongsContext';
 import { useSongControls } from '../context/SongControlsContext';
 import { useSettings } from '../context/SettingsContext';
@@ -79,7 +79,29 @@ const IconChevronRight = () => (
 );
 
 export default function Sidebar() {
-  const { isOpen, isMobile, toggle, close } = useSidebar();
+  const { isOpen, isMobile, toggle, close, width, setWidth } = useSidebar();
+  const resizingRef = useRef(false);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!resizingRef.current) return;
+      const newWidth = e.clientX;
+      setWidth(Math.min(Math.max(newWidth, MIN_LEFT_WIDTH), MAX_LEFT_WIDTH));
+    };
+    const onUp = () => { resizingRef.current = false; document.body.style.userSelect = ''; };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [setWidth]);
+
+  const startResize = (e) => {
+    e.preventDefault();
+    resizingRef.current = true;
+    document.body.style.userSelect = 'none';
+  };
   const { songs, setlists } = useSongs();
   const { controls } = useSongControls();
   const { settings, updateSettings, applyTheme, saveThemeColor, resetTheme } = useSettings();
@@ -245,13 +267,22 @@ export default function Sidebar() {
     <aside
       className="fixed top-0 left-0 h-screen flex flex-col z-40 overflow-hidden"
       style={{
-        width: SIDEBAR_WIDTH,
+        width,
         backgroundColor: colors.surface,
         borderRight: `1px solid ${colors.border}`,
         transition: isMobile ? 'transform 0.2s ease' : 'none',
-        transform: isMobile && !isOpen ? `translateX(-${SIDEBAR_WIDTH}px)` : 'translateX(0)',
+        transform: isMobile && !isOpen ? `translateX(-${width}px)` : 'translateX(0)',
       }}
     >
+      {/* Resize handle — desktop only */}
+      {!isMobile && (
+        <div
+          onMouseDown={startResize}
+          className="absolute top-0 bottom-0 right-0 w-1 cursor-ew-resize z-50"
+          style={{ marginRight: -3 }}
+          title="Перетащите для изменения ширины"
+        />
+      )}
       {/* Brand */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${colors.border}` }}>
         <Link to="/" onClick={handleNavClick} className="font-bold text-lg" style={{ color: colors.text }}>

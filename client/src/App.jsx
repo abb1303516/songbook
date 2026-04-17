@@ -3,6 +3,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import { AdminProvider } from './context/AdminContext';
 import { SongsProvider } from './context/SongsContext';
 import { SidebarProvider } from './context/SidebarContext';
+import { RightSidebarProvider } from './context/RightSidebarContext';
 import { SongControlsProvider } from './context/SongControlsContext';
 import AppLayout from './components/AppLayout';
 import SongList from './pages/SongList';
@@ -19,6 +20,7 @@ export default function App() {
       <AdminProvider>
         <SongsProvider>
           <SidebarProvider>
+            <RightSidebarProvider>
             <SongControlsProvider>
               <Routes>
                 <Route element={<AppLayout />}>
@@ -38,6 +40,7 @@ export default function App() {
                 </Route>
               </Routes>
             </SongControlsProvider>
+            </RightSidebarProvider>
           </SidebarProvider>
         </SongsProvider>
       </AdminProvider>

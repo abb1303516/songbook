@@ -1,14 +1,18 @@
 import { Outlet } from 'react-router-dom';
 import { useSidebar } from '../context/SidebarContext';
+import { useRightSidebar } from '../context/RightSidebarContext';
 import { useSettings } from '../context/SettingsContext';
 import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './Sidebar';
 
 export default function AppLayout() {
-  const { isOpen, isMobile, toggle } = useSidebar();
+  const leftSidebar = useSidebar();
+  const { isOpen, isMobile, toggle, width: leftWidth } = leftSidebar;
+  const rightSidebar = useRightSidebar();
   const { settings } = useSettings();
   const { colors } = settings;
 
-  const marginLeft = isMobile ? 0 : (isOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED);
+  const marginLeft = isMobile ? 0 : (isOpen ? leftWidth : SIDEBAR_COLLAPSED);
+  const marginRight = !rightSidebar.isMobile && rightSidebar.isOpen ? rightSidebar.width : 0;
 
   return (
     <div className="h-screen flex overflow-hidden" style={{ backgroundColor: colors.bg, color: colors.text }}>
@@ -44,7 +48,8 @@ export default function AppLayout() {
         className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden"
         style={{
           marginLeft,
-          transition: 'margin-left 0.2s ease',
+          marginRight,
+          transition: 'margin-left 0.2s ease, margin-right 0.2s ease',
         }}
       >
         <Outlet />

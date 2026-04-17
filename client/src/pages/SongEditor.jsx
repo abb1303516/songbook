@@ -16,6 +16,7 @@ export default function SongEditor() {
   const [key, setKey] = useState('');
   const [chordpro, setChordpro] = useState('');
   const [status, setStatus] = useState('new');
+  const [youtubeUrls, setYoutubeUrls] = useState(['', '', '']);
   const [showPreview, setShowPreview] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,6 +30,8 @@ export default function SongEditor() {
         setKey(song.key || '');
         setChordpro(song.chordpro || '');
         setStatus(song.status || 'new');
+        const urls = song.youtube_urls || [];
+        setYoutubeUrls([urls[0] || '', urls[1] || '', urls[2] || '']);
       }).finally(() => setLoading(false));
     }
   }, [id, isNew]);
@@ -43,6 +46,7 @@ export default function SongEditor() {
         key: key.trim(),
         chordpro: chordpro,
         status,
+        youtube_urls: youtubeUrls.map(u => u.trim()).filter(Boolean),
       };
       if (isNew) {
         const song = await createSong(data);
@@ -123,6 +127,27 @@ export default function SongEditor() {
             <option value="known">Знаю</option>
           </select>
         </div>
+
+        {/* YouTube URLs */}
+        <div className="space-y-1">
+          <div className="text-xs" style={{ color: colors.textMuted }}>YouTube ссылки (до 3)</div>
+          {youtubeUrls.map((url, i) => (
+            <input
+              key={i}
+              type="text"
+              placeholder={i === 0 ? 'Оригинал (URL или video ID)' : `Разбор ${i} (необязательно)`}
+              value={url}
+              onChange={e => {
+                const next = [...youtubeUrls];
+                next[i] = e.target.value;
+                setYoutubeUrls(next);
+              }}
+              className="w-full px-3 py-1.5 rounded-lg outline-none text-sm"
+              style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
+            />
+          ))}
+        </div>
+
         {/* Action buttons */}
         <div className="flex items-center gap-2">
           <button

@@ -4,10 +4,12 @@ import { fetchSong, fetchSetlist, updateSongTranspose } from '../api/songs';
 import { useSettings } from '../context/SettingsContext';
 import { useSongs } from '../context/SongsContext';
 import { useSongControls } from '../context/SongControlsContext';
+import { useRightSidebar } from '../context/RightSidebarContext';
 import { useAutoScroll } from '../hooks/useAutoScroll';
 import { transposeKey, chordToH } from '../utils/transpose';
 import SongContent from '../components/SongContent';
 import SongMenu from '../components/SongMenu';
+import RightSidebar from '../components/RightSidebar';
 
 const FIT_STEP = 0.05;
 
@@ -26,6 +28,7 @@ export default function SongView() {
   const { settings, updateSettings, getSongSettings, updateSongSettings } = useSettings();
   const { songs, setlists, navList, setNavList, reload } = useSongs();
   const { registerControls, unregisterControls } = useSongControls();
+  const rightSidebar = useRightSidebar();
   const { colors } = settings;
   const autoScroll = useAutoScroll(containerRef);
 
@@ -190,6 +193,21 @@ export default function SongView() {
           <span className="font-semibold truncate text-sm">{song.title}</span>
         </div>
 
+        {/* Tools panel toggle */}
+        <button
+          onClick={rightSidebar.toggle}
+          className="p-1.5 rounded cursor-pointer flex-shrink-0"
+          style={{ color: rightSidebar.isOpen ? colors.accent : colors.textMuted }}
+          title="Аккорды и плеер"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+        </button>
+
         {/* Three-dot menu */}
         <SongMenu
           songId={id}
@@ -271,6 +289,13 @@ export default function SongView() {
         </div>
         </div>
       </div>
+
+      {/* Right sidebar — chord diagrams + YouTube */}
+      <RightSidebar
+        chordpro={song.chordpro}
+        transpose={transpose}
+        youtubeUrls={song.youtube_urls || []}
+      />
     </div>
   );
 }
