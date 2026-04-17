@@ -18,15 +18,14 @@ function ChordCard({ chordName, colors }) {
   const entry = useMemo(() => findChord(chordName), [chordName]);
   const wrapRef = useRef(null);
 
-  // Hide inner SVG fret label (we show it externally) + strip "fr" as backup
+  // Strip "fr" suffix from the built-in SVG fret label (keep the number at its natural SVG position)
   useLayoutEffect(() => {
     if (!wrapRef.current) return;
     const texts = wrapRef.current.querySelectorAll('svg text');
     texts.forEach(t => {
       const txt = t.textContent || '';
       if (/^\d+fr$/.test(txt)) {
-        // Hide the internal label (we render pos.baseFret outside)
-        t.style.display = 'none';
+        t.textContent = txt.replace(/fr$/, '');
       }
     });
   });
@@ -51,38 +50,15 @@ function ChordCard({ chordName, colors }) {
       title={total > 1 ? 'Другой вариант' : ''}
     >
       <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
-      {/* SVG viewBox is 80x70; barre (fret 1) sits at y≈6.5 → ~9.3% from top */}
       <div
-        className="w-full relative"
-        style={{ aspectRatio: '80 / 70', paddingLeft: pos.baseFret > 1 ? '8%' : 0 }}
+        ref={wrapRef}
+        className="chord-diagram w-full"
+        style={{
+          '--chord-diagram-color': colors.text,
+          '--chord-diagram-bg': colors.bg,
+        }}
       >
-        {pos.baseFret > 1 && (
-          <div
-            className="font-mono absolute flex items-center justify-end"
-            style={{
-              color: colors.textMuted,
-              left: 0,
-              top: 0,
-              width: '8%',
-              height: '18.6%', /* 2 × barre y — center of range ≈ barre line */
-              lineHeight: 1,
-              fontSize: '0.8em',
-              paddingRight: 2,
-            }}
-          >
-            {pos.baseFret}
-          </div>
-        )}
-        <div
-          ref={wrapRef}
-          className="chord-diagram w-full h-full"
-          style={{
-            '--chord-diagram-color': colors.text,
-            '--chord-diagram-bg': colors.bg,
-          }}
-        >
-          <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
-        </div>
+        <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
       </div>
       {total > 1 && (
         <div className="text-xs mt-1" style={{ color: colors.textMuted }}>
