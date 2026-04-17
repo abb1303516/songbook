@@ -295,6 +295,7 @@ export default function SongView() {
         chordpro={song.chordpro}
         transpose={transpose}
         youtubeUrls={song.youtube_urls || []}
+        youtubeLabels={song.youtube_labels || []}
       />
     </div>
   );

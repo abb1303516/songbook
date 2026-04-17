@@ -1,0 +1,1 @@
+ALTER TABLE songs ADD COLUMN IF NOT EXISTS youtube_labels TEXT[] DEFAULT '{}';

@@ -17,6 +17,7 @@ export default function SongEditor() {
   const [chordpro, setChordpro] = useState('');
   const [status, setStatus] = useState('new');
   const [youtubeUrls, setYoutubeUrls] = useState(['', '', '']);
+  const [youtubeLabels, setYoutubeLabels] = useState(['', '', '']);
   const [showPreview, setShowPreview] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,7 +32,9 @@ export default function SongEditor() {
         setChordpro(song.chordpro || '');
         setStatus(song.status || 'new');
         const urls = song.youtube_urls || [];
+        const labels = song.youtube_labels || [];
         setYoutubeUrls([urls[0] || '', urls[1] || '', urls[2] || '']);
+        setYoutubeLabels([labels[0] || '', labels[1] || '', labels[2] || '']);
       }).finally(() => setLoading(false));
     }
   }, [id, isNew]);
@@ -46,7 +49,8 @@ export default function SongEditor() {
         key: key.trim(),
         chordpro: chordpro,
         status,
-        youtube_urls: youtubeUrls.map(u => u.trim()).filter(Boolean),
+        youtube_urls: youtubeUrls.map((u, i) => ({ url: u.trim(), label: (youtubeLabels[i] || '').trim() })).filter(x => x.url).map(x => x.url),
+        youtube_labels: youtubeUrls.map((u, i) => ({ url: u.trim(), label: (youtubeLabels[i] || '').trim() })).filter(x => x.url).map(x => x.label),
       };
       if (isNew) {
         const song = await createSong(data);
@@ -128,23 +132,36 @@ export default function SongEditor() {
           </select>
         </div>
 
-        {/* YouTube URLs */}
+        {/* YouTube URLs with labels */}
         <div className="space-y-1">
           <div className="text-xs" style={{ color: colors.textMuted }}>YouTube ссылки (до 3)</div>
           {youtubeUrls.map((url, i) => (
-            <input
-              key={i}
-              type="text"
-              placeholder={i === 0 ? 'Оригинал (URL или video ID)' : `Разбор ${i} (необязательно)`}
-              value={url}
-              onChange={e => {
-                const next = [...youtubeUrls];
-                next[i] = e.target.value;
-                setYoutubeUrls(next);
-              }}
-              className="w-full px-3 py-1.5 rounded-lg outline-none text-sm"
-              style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
-            />
+            <div key={i} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Название (напр. Оригинал, Разбор, Кавер)"
+                value={youtubeLabels[i] || ''}
+                onChange={e => {
+                  const next = [...youtubeLabels];
+                  next[i] = e.target.value;
+                  setYoutubeLabels(next);
+                }}
+                className="w-40 px-3 py-1.5 rounded-lg outline-none text-sm flex-shrink-0"
+                style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
+              />
+              <input
+                type="text"
+                placeholder="URL или video ID"
+                value={url}
+                onChange={e => {
+                  const next = [...youtubeUrls];
+                  next[i] = e.target.value;
+                  setYoutubeUrls(next);
+                }}
+                className="flex-1 px-3 py-1.5 rounded-lg outline-none text-sm"
+                style={{ backgroundColor: colors.surface, color: colors.text, border: `1px solid ${colors.border}` }}
+              />
+            </div>
           ))}
         </div>
 

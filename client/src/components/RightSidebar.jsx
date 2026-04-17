@@ -87,7 +87,7 @@ function ChordCard({ chordName, colors }) {
   );
 }
 
-export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = [] }) {
+export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = [], youtubeLabels = [] }) {
   const { isOpen, isMobile, close, width, setWidth, chordSize, setChordSize } = useRightSidebar();
   const { settings } = useSettings();
   const { colors } = settings;
@@ -235,20 +235,24 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
               <div className="mt-2">
                 {validYtUrls.length > 1 && (
                   <div className="flex gap-1 mb-2 flex-wrap">
-                    {validYtUrls.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setYtIdx(i)}
-                        className="px-2 py-0.5 rounded text-xs cursor-pointer"
-                        style={{
-                          backgroundColor: ytIdx === i ? colors.accent : 'transparent',
-                          color: ytIdx === i ? colors.bg : colors.textMuted,
-                          border: `1px solid ${ytIdx === i ? colors.accent : colors.border}`,
-                        }}
-                      >
-                        {i === 0 ? 'Оригинал' : `Разбор ${i}`}
-                      </button>
-                    ))}
+                    {validYtUrls.map((_, i) => {
+                      const origIdx = (youtubeUrls || []).findIndex(u => u === validYtUrls[i]);
+                      const label = (youtubeLabels[origIdx] || '').trim() || `Вариант ${i + 1}`;
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setYtIdx(i)}
+                          className="px-2 py-0.5 rounded text-xs cursor-pointer"
+                          style={{
+                            backgroundColor: ytIdx === i ? colors.accent : 'transparent',
+                            color: ytIdx === i ? colors.bg : colors.textMuted,
+                            border: `1px solid ${ytIdx === i ? colors.accent : colors.border}`,
+                          }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
                 <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
