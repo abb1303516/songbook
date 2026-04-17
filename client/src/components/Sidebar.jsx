@@ -129,7 +129,8 @@ export default function Sidebar() {
     }
     const qs = params.toString();
     navigate(`/${qs ? '?' + qs : ''}`, { replace: true });
-    if (isMobile) close();
+    // Don't close sidebar while typing in search
+    if (isMobile && type !== 'search') close();
   };
 
   const handleNavClick = () => {
