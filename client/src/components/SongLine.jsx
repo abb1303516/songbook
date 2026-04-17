@@ -26,26 +26,26 @@ export default function SongLine({ pairs, transpose = 0, showChords = true, chor
         let chord = p.chord ? transposeChord(p.chord, transpose) : '';
         if (useH && chord) chord = chordToH(chord);
 
-        // Each pair is a vertical block (chord over text), wraps as unit
+        // Each pair: inline-block, text wraps by words, chord stays above first word
         return (
-          <div
+          <span
             key={i}
             style={{
               display: 'inline-block',
               verticalAlign: 'top',
-              whiteSpace: 'pre',
+              wordSpacing: 'normal',
             }}
           >
             {showChordRow && (
-              <div
+              <span
                 className="font-semibold select-none"
-                style={{ color: chordColor, minHeight: chord ? undefined : '1em' }}
+                style={{ color: chordColor, display: 'block', whiteSpace: 'pre', minHeight: '1em' }}
               >
                 {chord ? <span style={chordSpanStyle}>{chord}</span> : '\u00A0'}
-              </div>
+              </span>
             )}
-            <div>{p.text}</div>
-          </div>
+            <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'normal', overflowWrap: 'break-word' }}>{p.text}</span>
+          </span>
         );
       })}
     </div>
