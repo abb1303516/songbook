@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import Chord from '@tombatossals/react-chords/lib/Chord';
-import { useRightSidebar, MIN_RIGHT_WIDTH, MAX_RIGHT_WIDTH } from '../context/RightSidebarContext';
+import { useRightSidebar, MIN_RIGHT_WIDTH, MAX_RIGHT_WIDTH, MIN_CHORD_SIZE, MAX_CHORD_SIZE } from '../context/RightSidebarContext';
 import { useSettings } from '../context/SettingsContext';
 import { extractChords, findChord, GUITAR_INSTRUMENT } from '../utils/chordDiagram';
 import { transposeChord, chordToH } from '../utils/transpose';
@@ -53,7 +53,7 @@ function ChordCard({ chordName, colors }) {
 }
 
 export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = [] }) {
-  const { isOpen, isMobile, close, width, setWidth } = useRightSidebar();
+  const { isOpen, isMobile, close, width, setWidth, chordSize, setChordSize } = useRightSidebar();
   const { settings } = useSettings();
   const { colors } = settings;
   const [ytIdx, setYtIdx] = useState(0);
@@ -149,14 +149,32 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
               </svg>
             </button>
             {chordsOpen && uniqueChords.length > 0 && (
-              <div
-                className="gap-2 mt-2"
-                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))' }}
-              >
-                {uniqueChords.map((c, i) => (
-                  <ChordCard key={`${c}-${i}`} chordName={c} colors={colors} />
-                ))}
-              </div>
+              <>
+                {/* Size controls */}
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-xs" style={{ color: colors.textMuted }}>Размер</span>
+                  <button
+                    onClick={() => setChordSize(Math.max(chordSize - 20, MIN_CHORD_SIZE))}
+                    disabled={chordSize <= MIN_CHORD_SIZE}
+                    className="px-2.5 py-0.5 rounded font-mono text-sm cursor-pointer disabled:opacity-40"
+                    style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
+                  >−</button>
+                  <button
+                    onClick={() => setChordSize(Math.min(chordSize + 20, MAX_CHORD_SIZE))}
+                    disabled={chordSize >= MAX_CHORD_SIZE}
+                    className="px-2.5 py-0.5 rounded font-mono text-sm cursor-pointer disabled:opacity-40"
+                    style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
+                  >+</button>
+                </div>
+                <div
+                  className="gap-2 mt-2"
+                  style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${chordSize}px, 1fr))` }}
+                >
+                  {uniqueChords.map((c, i) => (
+                    <ChordCard key={`${c}-${i}`} chordName={c} colors={colors} />
+                  ))}
+                </div>
+              </>
             )}
             {chordsOpen && uniqueChords.length === 0 && (
               <div className="text-xs py-2" style={{ color: colors.textMuted }}>В песне нет аккордов</div>

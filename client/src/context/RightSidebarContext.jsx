@@ -3,10 +3,14 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 const RightSidebarContext = createContext(null);
 const STORAGE_KEY = 'songbook-right-sidebar';
 const WIDTH_KEY = 'songbook-right-sidebar-width';
+const CHORD_SIZE_KEY = 'songbook-chord-size';
 
 export const DEFAULT_RIGHT_WIDTH = 280;
 export const MIN_RIGHT_WIDTH = 200;
 export const MAX_RIGHT_WIDTH = 500;
+export const DEFAULT_CHORD_SIZE = 110;
+export const MIN_CHORD_SIZE = 70;
+export const MAX_CHORD_SIZE = 250;
 
 export function RightSidebarProvider({ children }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -19,6 +23,11 @@ export function RightSidebarProvider({ children }) {
     const saved = localStorage.getItem(WIDTH_KEY);
     const n = saved ? parseInt(saved, 10) : DEFAULT_RIGHT_WIDTH;
     return Math.min(Math.max(n || DEFAULT_RIGHT_WIDTH, MIN_RIGHT_WIDTH), MAX_RIGHT_WIDTH);
+  });
+  const [chordSize, setChordSize] = useState(() => {
+    const saved = localStorage.getItem(CHORD_SIZE_KEY);
+    const n = saved ? parseInt(saved, 10) : DEFAULT_CHORD_SIZE;
+    return Math.min(Math.max(n || DEFAULT_CHORD_SIZE, MIN_CHORD_SIZE), MAX_CHORD_SIZE);
   });
 
   useEffect(() => {
@@ -39,11 +48,15 @@ export function RightSidebarProvider({ children }) {
     localStorage.setItem(WIDTH_KEY, String(width));
   }, [width]);
 
+  useEffect(() => {
+    localStorage.setItem(CHORD_SIZE_KEY, String(chordSize));
+  }, [chordSize]);
+
   const toggle = useCallback(() => setIsOpen(prev => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
   return (
-    <RightSidebarContext.Provider value={{ isOpen, isMobile, toggle, close, width, setWidth }}>
+    <RightSidebarContext.Provider value={{ isOpen, isMobile, toggle, close, width, setWidth, chordSize, setChordSize }}>
       {children}
     </RightSidebarContext.Provider>
   );
