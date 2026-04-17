@@ -223,7 +223,27 @@ export default function SongView() {
           </div>
         )}
 
-        <div ref={containerRef} className="h-full overflow-auto">
+        <div
+          ref={containerRef}
+          className="h-full overflow-y-auto overflow-x-hidden"
+          onTouchStart={(e) => {
+            const t = e.touches[0];
+            containerRef.current._touchStart = { x: t.clientX, y: t.clientY };
+          }}
+          onTouchEnd={(e) => {
+            const start = containerRef.current._touchStart;
+            if (!start) return;
+            const t = e.changedTouches[0];
+            const dx = t.clientX - start.x;
+            const dy = t.clientY - start.y;
+            // Horizontal swipe with minimum distance, mostly horizontal
+            if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2) {
+              if (dx > 0 && hasPrev) goTo(currentIdx - 1);
+              else if (dx < 0 && hasNext) goTo(currentIdx + 1);
+            }
+            containerRef.current._touchStart = null;
+          }}
+        >
           <div ref={contentRef} className="px-4 py-4">
           <SongContent
             chordpro={song.chordpro}
