@@ -18,15 +18,13 @@ function ChordCard({ chordName, colors }) {
   const entry = useMemo(() => findChord(chordName), [chordName]);
   const wrapRef = useRef(null);
 
-  // Strip "fr" suffix from the built-in SVG fret label (keep the number at its natural SVG position)
+  // Hide the built-in SVG fret label (it conflicts with React when we try to strip "fr").
+  // We render the fret number separately below.
   useLayoutEffect(() => {
     if (!wrapRef.current) return;
     const texts = wrapRef.current.querySelectorAll('svg text');
     texts.forEach(t => {
-      const txt = t.textContent || '';
-      if (/^\d+fr$/.test(txt)) {
-        t.textContent = txt.replace(/fr$/, '');
-      }
+      if (/^\d+fr$/.test(t.textContent || '')) t.style.display = 'none';
     });
   });
 
@@ -49,7 +47,12 @@ function ChordCard({ chordName, colors }) {
       onClick={() => setPosIdx((posIdx + 1) % total)}
       title={total > 1 ? 'Другой вариант' : ''}
     >
-      <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
+      <div className="flex items-baseline gap-1.5 mb-1">
+        <span className="font-semibold text-base" style={{ color: colors.chords }}>{chordName}</span>
+        {pos.baseFret > 1 && (
+          <span className="font-mono text-xs" style={{ color: colors.textMuted }}>лад {pos.baseFret}</span>
+        )}
+      </div>
       <div
         ref={wrapRef}
         className="chord-diagram w-full"
