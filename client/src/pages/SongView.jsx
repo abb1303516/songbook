@@ -94,10 +94,12 @@ export default function SongView() {
   }, [id, fontSize, lineHeight, updateSongSettings]);
 
   const adjustFit = useCallback((delta) => {
-    const current = fitScale || 1.0;
-    const next = Math.max(Math.min(current + delta, 2.0), 0.3);
-    updateSongSettings(id, { fitScale: +next.toFixed(3) });
-  }, [id, fitScale, updateSongSettings]);
+    updateSongSettings(id, prev => {
+      const current = prev.fitScale || 1.0;
+      const next = Math.max(Math.min(current + delta, 2.0), 0.3);
+      return { fitScale: +next.toFixed(3) };
+    });
+  }, [id, updateSongSettings]);
 
   const resetFit = useCallback(() => {
     updateSongSettings(id, { fitScale: null });
@@ -117,9 +119,12 @@ export default function SongView() {
       scrollOn: autoScroll.on,
       scrollSpeed: autoScroll.speed,
       onTranspose: (delta) => {
-        const newT = transpose + delta;
-        setSong(prev => prev ? { ...prev, transpose: newT } : prev);
-        updateSongTranspose(id, newT).catch(() => {});
+        setSong(prev => {
+          if (!prev) return prev;
+          const newT = (prev.transpose || 0) + delta;
+          updateSongTranspose(id, newT).catch(() => {});
+          return { ...prev, transpose: newT };
+        });
       },
       onFontSize: (val) => updateSettings({ fontSize: val }),
       onLineHeight: (val) => updateSongSettings(id, { lineHeight: val }),
@@ -128,8 +133,10 @@ export default function SongView() {
       onFitIncrease: () => adjustFit(FIT_STEP),
       onFitDecrease: () => adjustFit(-FIT_STEP),
       onColumns: () => {
-        const next = columns >= 3 ? 1 : columns + 1;
-        updateSongSettings(id, { columns: next });
+        updateSongSettings(id, prev => {
+          const cur = prev.columns || 1;
+          return { columns: cur >= 3 ? 1 : cur + 1 };
+        });
       },
       onScrollToggle: () => autoScroll.setOn(!autoScroll.on),
       onScrollSpeed: (val) => autoScroll.setSpeed(val),

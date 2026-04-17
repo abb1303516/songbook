@@ -144,7 +144,8 @@ export function useLocalSettings() {
 
   const updateSettings = useCallback((updates) => {
     setServerSettings(prev => {
-      const next = typeof updates === 'function' ? updates(prev) : { ...prev, ...updates };
+      const resolvedUpdates = typeof updates === 'function' ? updates(prev) : updates;
+      const next = { ...prev, ...resolvedUpdates };
       saveToServer(next);
       return next;
     });
@@ -158,11 +159,13 @@ export function useLocalSettings() {
 
   const updateSongSettings = useCallback((songId, updates) => {
     setLocalSettings(prev => {
+      const prevSong = prev.songSettings?.[songId] || {};
+      const resolvedUpdates = typeof updates === 'function' ? updates(prevSong) : updates;
       const next = {
         ...prev,
         songSettings: {
           ...prev.songSettings,
-          [songId]: { ...prev.songSettings?.[songId], ...updates },
+          [songId]: { ...prevSong, ...resolvedUpdates },
         },
       };
       saveLocal(next);
