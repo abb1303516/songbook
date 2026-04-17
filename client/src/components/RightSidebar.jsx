@@ -47,21 +47,40 @@ function ChordCard({ chordName, colors }) {
       onClick={() => setPosIdx((posIdx + 1) % total)}
       title={total > 1 ? 'Другой вариант' : ''}
     >
-      <div className="flex items-baseline gap-1.5 mb-1">
-        <span className="font-semibold text-base" style={{ color: colors.chords }}>{chordName}</span>
-        {pos.baseFret > 1 && (
-          <span className="font-mono text-xs" style={{ color: colors.textMuted }}>лад {pos.baseFret}</span>
-        )}
-      </div>
-      <div
-        ref={wrapRef}
-        className="chord-diagram w-full"
-        style={{
-          '--chord-diagram-color': colors.text,
-          '--chord-diagram-bg': colors.bg,
-        }}
-      >
-        <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
+      <div className="font-semibold text-base mb-1" style={{ color: colors.chords }}>{chordName}</div>
+      {/* Wrapper holds SVG (aspect 80/70) and label positioned at barre level */}
+      <div className="flex w-full items-start">
+        <div className="relative" style={{ flex: 1, aspectRatio: '80 / 70' }}>
+          <div
+            ref={wrapRef}
+            className="chord-diagram w-full h-full"
+            style={{
+              '--chord-diagram-color': colors.text,
+              '--chord-diagram-bg': colors.bg,
+            }}
+          >
+            <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
+          </div>
+          {pos.baseFret > 1 && (
+            <div
+              className="font-mono font-semibold absolute"
+              style={{
+                color: colors.textMuted,
+                left: '100%',
+                top: '9.29%',
+                transform: 'translateY(-50%)',
+                fontSize: '0.75em',
+                lineHeight: 1,
+                paddingLeft: 3,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {pos.baseFret}
+            </div>
+          )}
+        </div>
+        {/* Reserve space to the right for the label so it doesn't clip */}
+        {pos.baseFret > 1 && <div style={{ width: '1.2em', flexShrink: 0 }} />}
       </div>
       {total > 1 && (
         <div className="text-xs mt-1" style={{ color: colors.textMuted }}>
