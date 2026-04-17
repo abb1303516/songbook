@@ -71,6 +71,8 @@ body {
 }
 .chord-diagram svg text {
   fill: var(--chord-diagram-color, #e0e0e0);
+  font-size: 5px !important;
+  font-weight: bold;
 }
 /* "X" muted strings and labels — white means "open", keep it, but on dark bg need subtle contrast */
 .chord-diagram svg [fill="white"] {
