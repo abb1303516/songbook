@@ -14,12 +14,8 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
-// Admin auth middleware for mutations
+// Admin auth disabled — pass-through middleware
 function requireAdmin(req, res, next) {
-  const password = req.headers['x-admin-password'];
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Неверный пароль' });
-  }
   next();
 }
 

@@ -6,23 +6,11 @@ const AdminContext = createContext(null);
 const STORAGE_KEY = 'songbook-admin-password';
 
 export function AdminProvider({ children }) {
-  // If password exists in localStorage, trust it immediately — no API check
-  const [isAdmin, setIsAdmin] = useState(() => !!localStorage.getItem(STORAGE_KEY));
+  // Admin control disabled — all actions available to everyone
+  const [isAdmin] = useState(true);
 
-  const login = useCallback(async (password) => {
-    const ok = await verifyAdmin(password);
-    if (ok) {
-      localStorage.setItem(STORAGE_KEY, password);
-      setIsAdmin(true);
-      return true;
-    }
-    return false;
-  }, []);
-
-  const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setIsAdmin(false);
-  }, []);
+  const login = useCallback(async () => true, []);
+  const logout = useCallback(() => {}, []);
 
   return (
     <AdminContext.Provider value={{ isAdmin, checking: false, login, logout }}>
