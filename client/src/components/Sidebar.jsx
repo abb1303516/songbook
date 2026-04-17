@@ -150,7 +150,9 @@ export default function Sidebar() {
   );
 
   // ─── Collapsed sidebar (icon strip) ───
+  // On mobile: hide completely when closed (hamburger in AppLayout handles opening)
   if (!isOpen) {
+    if (isMobile) return null;
     return (
       <aside
         className="fixed top-0 left-0 h-screen flex flex-col z-40"
