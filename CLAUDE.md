@@ -25,7 +25,8 @@
 - **Sidebar layout** — навигация, фильтры, настройки в боковой панели; основной контент справа
 - **Единый SongView** — просмотр песни из любого контекста (список, сет-лист); галерейная навигация prev/next
 - **Публичный фронтенд** — просмотр песен, сет-листов
-- **Админка** (`/admin`) — редактирование песен, сет-листов, импорт. Защита: пароль (env `ADMIN_PASSWORD`, заголовок `X-Admin-Password`)
+- **Админка** (`/admin`) — редактирование песен, сет-листов, импорт. Защита: пароль (env `ADMIN_PASSWORD`, заголовок `X-Admin-Password`).
+  - **Временно отключено** — `AdminProvider` всегда `isAdmin=true`, серверный `requireAdmin` middleware — pass-through. Вернём позже. Код входа/выхода и middleware в коде сохранён.
 - **Настройки** — глобальные в PostgreSQL (темы, шрифт, интервал), per-device в localStorage (fitScale, sidebar state)
 - **Данные песен** — в PostgreSQL (title, artist, key, chordpro, tags, status, transpose)
 - **Формат песен** — ChordPro (аккорды в [квадратных скобках])
@@ -64,13 +65,14 @@ server/                  # Node.js + Express
 
 ## API
 
+Маркер `[admin]` означает "требует пароль когда admin включён". Сейчас admin **временно отключён** — все endpoints доступны без пароля.
 ```
 GET    /api/songs                  # Все песни (включая transpose, youtube_urls, youtube_labels)
 GET    /api/songs/:id              # Одна песня (все поля включая chordpro)
 POST   /api/songs          [admin] # Создать
 PUT    /api/songs/:id       [admin] # Обновить
-PUT    /api/songs/:id/status       # Обновить статус (публичный)
-PUT    /api/songs/:id/transpose    # Обновить транспонирование (публичный)
+PUT    /api/songs/:id/status       # Обновить статус (всегда публичный)
+PUT    /api/songs/:id/transpose    # Обновить транспонирование (всегда публичный)
 DELETE /api/songs/:id       [admin] # Удалить
 
 GET    /api/setlists               # Все сет-листы
@@ -240,8 +242,9 @@ Hex-ввод + color picker. Кнопка "Сбросить цвета темы"
 | Стиль аккордов (фон/рамка/оба) + chordBg | Готово |
 | Многоколоночный текст (1-2-3) | Готово |
 | Quick controls на свёрнутом sidebar | Готово |
-| Редактор сет-листа (↑↓, фильтр, три точки) | Готово |
-| Админка (пароль) | Готово |
+| Редактор сет-листа (↑↓, фильтр, три точки, mobile-friendly) | Готово |
+| Меню сет-листа в sidebar (три точки: edit/delete) | Готово |
+| Админка (пароль) | Временно отключена (вернём позже) |
 | Редактор песни (ChordPro + превью) | Готово |
 | Импорт ChordPro (файл/текст) | Готово |
 | Экспорт коллекции | Готово |
