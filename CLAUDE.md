@@ -55,20 +55,22 @@ server/                  # Node.js + Express
 
 | Контекст | Назначение |
 |----------|-----------|
-| SettingsContext | Тема, цвета, шрифт, интервал (серверные + localStorage) |
+| SettingsContext | Тема, цвета, шрифт (серверные + localStorage) |
 | AdminContext | Авторизация admin (пароль в localStorage) |
 | SongsContext | Песни, сет-листы, navList для галерейной навигации |
-| SidebarContext | Состояние sidebar (open/close, mobile detection, persist) |
+| SidebarContext | Левая панель: open/close, mobile, ширина (resize) |
+| RightSidebarContext | Правая панель: open/close, mobile, ширина, chordSize |
 | SongControlsContext | Мост SongView ↔ Sidebar для per-song controls |
 
 ## API
 
 ```
-GET    /api/songs                  # Все песни (id, title, artist, key, tags, status, transpose, sort_order, created_at)
+GET    /api/songs                  # Все песни (включая transpose, youtube_urls, youtube_labels)
 GET    /api/songs/:id              # Одна песня (все поля включая chordpro)
 POST   /api/songs          [admin] # Создать
 PUT    /api/songs/:id       [admin] # Обновить
-PUT    /api/songs/:id/status       # Обновить статус (публичный, без admin)
+PUT    /api/songs/:id/status       # Обновить статус (публичный)
+PUT    /api/songs/:id/transpose    # Обновить транспонирование (публичный)
 DELETE /api/songs/:id       [admin] # Удалить
 
 GET    /api/setlists               # Все сет-листы
@@ -96,12 +98,19 @@ POST   /api/admin/verify           # Проверить пароль
 ## БД
 
 ```sql
-songs    (id, title, artist, key, chordpro, tags[], status, transpose, sort_order, created_at, updated_at)
+songs    (id, title, artist, key, chordpro, tags[], status, transpose, youtube_urls[], youtube_labels[], sort_order, created_at, updated_at)
 setlists (id, name, song_ids[], created_at, updated_at)
 settings (key TEXT PRIMARY KEY, value JSONB)  -- одна строка 'global'
 ```
 
 Статусы песен: `new` (по умолчанию), `learning`, `known`
+
+Миграции:
+- `001-init.sql` — базовые таблицы
+- `002-song-status.sql` — поле `status`
+- `003-transpose-and-settings.sql` — `transpose` + таблица `settings`
+- `004-youtube-urls.sql` — `youtube_urls TEXT[]`
+- `005-youtube-labels.sql` — `youtube_labels TEXT[]` параллельно с urls
 
 ## Хранение настроек
 
@@ -115,7 +124,9 @@ settings (key TEXT PRIMARY KEY, value JSONB)  -- одна строка 'global'
 | showChords, useH, chordStyle | БД (settings) | Глобальная настройка |
 | fitScale, columns | localStorage, per-song | Зависит от размера экрана устройства |
 | navList | sessionStorage | Сохраняется при F5, очищается при закрытии вкладки |
-| Состояние sidebar | localStorage | Per-device |
+| Состояние + ширина левого sidebar | localStorage | Per-device, ресайз мышкой (200-400px) |
+| Состояние + ширина правой панели | localStorage | Per-device, ресайз мышкой (200-500px) |
+| Размер аппликатур (chordSize) | localStorage | Per-device (70-250px, шаг 20px) |
 
 ## Роутинг (URL)
 
@@ -142,13 +153,30 @@ settings (key TEXT PRIMARY KEY, value JSONB)  -- одна строка 'global'
 - Per-song controls в sidebar: транспонирование, масштаб, колонки, автопрокрутка
 - Быстрые controls на свёрнутом sidebar: транспонирование ↑↓, масштаб +/−, колонки
 
-## Sidebar
+## Sidebar (левая панель)
 
-Раскрытый (260px): лого, поиск, все песни, фильтр по статусу, исполнители, сет-листы (активный выделен), admin actions, настройки (темы, 12 цветов с hex, просмотр, стиль аккордов), per-song controls.
+Раскрытый (260px по умолчанию, настраивается): лого, поиск, все песни, фильтр по статусу, исполнители, сет-листы (активный выделен), admin actions, настройки (темы, 12 цветов с hex, просмотр, стиль аккордов), per-song controls.
 
 Свёрнутый (48px): иконки — меню, песни, исполнители, сет-листы, настройки + quick controls при просмотре песни (тон ↑↓, масштаб +/−, колонки).
 
-Mobile (<768px): drawer overlay.
+Ширина настраивается перетаскиванием правого края (200-400px).
+
+Mobile (<768px): drawer overlay, плавающий hamburger.
+
+## Правая панель (RightSidebar)
+
+Открывается кнопкой-grid в заголовке SongView. Содержит:
+- **Аккорды** — аппликатуры из текущей песни, через `@tombatossals/react-chords` + `chords-db`
+  - Grid с auto-fit по размеру диаграмм
+  - Кнопки +/- для размера (70-250px)
+  - Клик по диаграмме — цикл по вариантам позиций (X/N)
+  - Номер лада слева от диаграммы на уровне barre (top: 27.86% = (13+6.5)/70, учитывая translate(13,13) в SVG)
+- **YouTube** — до 3 ссылок с кастомными лейблами
+  - Табы с названиями из `youtube_labels[]`
+  - iframe 16:9
+
+Ширина настраивается перетаскиванием левого края (200-500px), per-device.
+Mobile: drawer справа с backdrop.
 
 ## Темы и цвета
 
@@ -224,29 +252,40 @@ Hex-ввод + color picker. Кнопка "Сбросить цвета темы"
 | Mobile responsive (drawer, swipe, word-wrap) | Готово |
 | Справка по ChordPro в редакторе | Готово |
 | Стилизация скроллбара (глобально) | Готово |
-| Аппликатуры аккордов (правая панель) | В работе |
-| Мини-плеер YouTube (youtube_urls[]) | В работе |
-| Ресайз ширины sidebar мышкой | Планируется |
+| Аппликатуры аккордов (правая панель) | Готово |
+| Мини-плеер YouTube (до 3 ссылок с лейблами) | Готово |
+| Ресайз ширины sidebar мышкой (оба) | Готово |
+| Настройка размера аппликатур (+/−) | Готово |
 | Версии сложности аккордов | Планируется |
 | Автоподбор тональности | Планируется |
 | PWA / офлайн | Планируется |
 | Экспорт в PDF | Планируется |
 
-## Текущая работа: правая панель
+## Аппликатуры аккордов
 
-Симметрично левому sidebar. На desktop — 280px справа постоянно, на mobile — drawer.
+Используется `@tombatossals/react-chords@0.2.10` + `@tombatossals/chords-db@0.5.1` (~500 аккордов).
 
-**Содержимое (только на странице песни):**
-- Аппликатуры аккордов из текущей песни — через `@tombatossals/react-chords` + `@tombatossals/chords-db`
-- YouTube плеер — до 3 ссылок (поле `songs.youtube_urls TEXT[]`)
+**Парсинг уникальных аккордов** из ChordPro текста (с учётом transpose + useH).
 
-**Решения:**
-- Новый контекст `RightSidebarContext` (аналог SidebarContext)
-- Открывается кнопкой справа в заголовке SongView
-- Ресайз ширины через draggable border (mouse drag), сохраняется в localStorage
+**Ключевые фиксы под тёмные темы:**
+- CSS переопределяет `[fill="#444"]` → `colors.text`
+- Номера пальцев (`text[fill="white"]`) — получают `colors.bg` для контраста
+- Открытые струны (`circle[fill="white"]`) — outline вместо fill
+- Шрифт tuning-нот 5px bold
+- `display:none` на built-in SVG fret label (конфликтовал с React)
 
-**Установлено:**
-- `@tombatossals/react-chords@0.2.10`
-- `@tombatossals/chords-db@0.5.1` (~500 готовых аккордов с вариантами)
+**Номер лада** — рендерится как отдельный HTML-div слева от диаграммы:
+- SVG viewBox `80×70`, но внутри `<g transform="translate(13, 13)">`
+- Barre на SVG y = 13 + 6.5 = 19.5 → top 27.86% с translateY(-50%)
+- Обёртка имеет `aspect-ratio: 80/70` для стабильной пропорции
 
-**Миграция 004-youtube-urls.sql:** добавлено поле `youtube_urls TEXT[]` в songs. Серверный роут уже обновлён.
+**Нормализация позиций** (`normalizePosition`):
+- Когда baseFret=1 и все frets ≥ 2 без открытых струн — сдвигаем, чтобы baseFret отражал реальный лад
+- Открытые струны (fret=0) сохраняются — диаграмма остаётся с nut линией
+
+## YouTube плеер
+
+- До 3 ссылок: `songs.youtube_urls TEXT[]` + `songs.youtube_labels TEXT[]`
+- Парсинг video ID из URL: `utils/youtube.js`
+- Табы переключения с кастомными названиями (label или "Вариант N")
+- iframe 16:9 с preserved-aspect-ratio
