@@ -196,13 +196,13 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs" style={{ color: colors.textMuted }}>Размер</span>
                   <button
-                    onClick={() => setChordSize(Math.max(chordSize - 20, MIN_CHORD_SIZE))}
+                    onClick={() => setChordSize(Math.max(chordSize - 10, MIN_CHORD_SIZE))}
                     disabled={chordSize <= MIN_CHORD_SIZE}
                     className="px-2.5 py-0.5 rounded font-mono text-sm cursor-pointer disabled:opacity-40"
                     style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
                   >−</button>
                   <button
-                    onClick={() => setChordSize(Math.min(chordSize + 20, MAX_CHORD_SIZE))}
+                    onClick={() => setChordSize(Math.min(chordSize + 10, MAX_CHORD_SIZE))}
                     disabled={chordSize >= MAX_CHORD_SIZE}
                     className="px-2.5 py-0.5 rounded font-mono text-sm cursor-pointer disabled:opacity-40"
                     style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}

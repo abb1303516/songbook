@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { HexColorPicker } from 'react-colorful';
 import { useSidebar, MIN_LEFT_WIDTH, MAX_LEFT_WIDTH } from '../context/SidebarContext';
+import SetlistMenu from './SetlistMenu';
 import { useSongs } from '../context/SongsContext';
 import { useSongControls } from '../context/SongControlsContext';
 import { useSettings } from '../context/SettingsContext';
@@ -430,18 +431,12 @@ export default function Sidebar() {
                   </Link>
                   <span className="flex-shrink-0" style={{ color: isActive ? colors.bg : colors.textMuted }}>{sl.song_ids?.length || 0}</span>
                   {isAdmin && (
-                    <Link
-                      to={`/admin/setlists/${sl.id}`}
-                      onClick={handleNavClick}
-                      className="flex-shrink-0 opacity-0 group-hover:opacity-60"
-                      style={{ color: colors.textMuted }}
-                      title="Редактировать"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </Link>
+                    <SetlistMenu
+                      setlistId={sl.id}
+                      setlistName={sl.name}
+                      activeColor={isActive ? colors.bg : colors.textMuted}
+                      onActionComplete={handleNavClick}
+                    />
                   )}
                 </div>
               );
