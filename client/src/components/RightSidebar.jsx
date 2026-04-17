@@ -58,14 +58,16 @@ function ChordCard({ chordName, colors }) {
       >
         {pos.baseFret > 1 && (
           <div
-            className="font-mono absolute"
+            className="font-mono absolute flex items-center justify-end"
             style={{
               color: colors.textMuted,
               left: 0,
-              top: '9.3%',
-              transform: 'translateY(-50%)',
+              top: 0,
+              width: '8%',
+              height: '18.6%', /* 2 × barre y — center of range ≈ barre line */
               lineHeight: 1,
               fontSize: '0.8em',
+              paddingRight: 2,
             }}
           >
             {pos.baseFret}
