@@ -51,16 +51,20 @@ function ChordCard({ chordName, colors }) {
       title={total > 1 ? 'Другой вариант' : ''}
     >
       <div className="font-semibold text-sm mb-1" style={{ color: colors.chords }}>{chordName}</div>
-      <div className="w-full relative">
-        {/* External fret label positioned at top-left of the nut area (first fret row) */}
+      {/* SVG viewBox is 80x70; barre (fret 1) sits at y≈6.5 → ~9.3% from top */}
+      <div
+        className="w-full relative"
+        style={{ aspectRatio: '80 / 70', paddingLeft: pos.baseFret > 1 ? '8%' : 0 }}
+      >
         {pos.baseFret > 1 && (
           <div
-            className="text-xs font-mono absolute"
+            className="font-mono absolute"
             style={{
               color: colors.textMuted,
               left: 0,
-              top: '18%',
+              top: '7%',
               lineHeight: 1,
+              fontSize: '0.8em',
             }}
           >
             {pos.baseFret}
@@ -68,11 +72,10 @@ function ChordCard({ chordName, colors }) {
         )}
         <div
           ref={wrapRef}
-          className="chord-diagram w-full"
+          className="chord-diagram w-full h-full"
           style={{
             '--chord-diagram-color': colors.text,
             '--chord-diagram-bg': colors.bg,
-            paddingLeft: pos.baseFret > 1 ? 14 : 0,
           }}
         >
           <Chord chord={pos} instrument={GUITAR_INSTRUMENT} lite={false} />
