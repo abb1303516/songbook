@@ -459,7 +459,7 @@ export default function Sidebar() {
         </div>
 
         {/* Admin actions */}
-        {isAdmin && (
+        {isAdmin ? (
           <div className="px-3 py-2 space-y-1" style={{ borderBottom: `1px solid ${colors.border}` }}>
             <Link to="/admin/songs/new" onClick={handleNavClick} className="flex items-center gap-2 px-2 py-1 rounded text-sm" style={{ color: colors.accent }}>
               <IconPlus /> Добавить песню
@@ -476,6 +476,15 @@ export default function Sidebar() {
               </svg>
               Экспорт
             </a>
+          </div>
+        ) : (
+          <div className="px-3 py-2" style={{ borderBottom: `1px solid ${colors.border}` }}>
+            <Link to="/admin" onClick={handleNavClick} className="flex items-center gap-2 px-2 py-1 rounded text-sm" style={{ color: colors.textMuted }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+              Войти как админ
+            </Link>
           </div>
         )}
 
