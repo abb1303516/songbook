@@ -25,12 +25,12 @@ function normalizeRoot(root) {
 }
 
 // Convert sharp/flat to chords-db key format
-// chords-db uses: C, C#, D, Eb, E, F, F#, G, Ab, A, Bb, B
+// chords-db uses: C, Csharp, D, Eb, E, F, Fsharp, G, Ab, A, Bb, B
 const KEY_MAP = {
-  'C': 'C', 'C#': 'C#', 'Db': 'C#',
+  'C': 'C', 'C#': 'Csharp', 'Db': 'Csharp',
   'D': 'D', 'D#': 'Eb', 'Eb': 'Eb',
   'E': 'E',
-  'F': 'F', 'F#': 'F#', 'Gb': 'F#',
+  'F': 'F', 'F#': 'Fsharp', 'Gb': 'Fsharp',
   'G': 'G', 'G#': 'Ab', 'Ab': 'Ab',
   'A': 'A', 'A#': 'Bb', 'Bb': 'Bb',
   'B': 'B',
