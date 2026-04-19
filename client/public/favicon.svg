@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <path d="M32 4 C15 4 4 14 4 26 C4 40 22 56 32 60 C42 56 60 40 60 26 C60 14 49 4 32 4 Z"
+        fill="#f59e0b" stroke="#1a1a2e" stroke-width="3" stroke-linejoin="round"/>
+  <text x="32" y="40" text-anchor="middle"
+        font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="24"
+        fill="#1a1a2e" letter-spacing="-1.5">AB</text>
+</svg>
