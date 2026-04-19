@@ -50,6 +50,12 @@ server/                  # Node.js + Express
     db/
       pool.js            # pg Pool + auto-migrations
       migrations/        # SQL файлы (001-init, 002-song-status, ...)
+
+scripts/                 # CLI-хелперы (не деплоятся)
+  import-parser.mjs      # Парсер chord-over-text → ChordPro (UG paste / amdm / akkords HTML)
+
+.claude/agents/          # Project-level Claude Code агенты
+  song-importer.md       # Импорт песни через subagent (paste/URL → preview → POST)
 ```
 
 ## Контексты (React)
@@ -113,6 +119,23 @@ settings (key TEXT PRIMARY KEY, value JSONB)  -- одна строка 'global'
 - `003-transpose-and-settings.sql` — `transpose` + таблица `settings`
 - `004-youtube-urls.sql` — `youtube_urls TEXT[]`
 - `005-youtube-labels.sql` — `youtube_labels TEXT[]` параллельно с urls
+
+## Импорт песен
+
+Новые песни обычно добавляются через subagent `song-importer` в чате Claude Code:
+1. Пользователь вставляет UG copy-paste (или URL amdm/akkords) → агент вызывает `scripts/import-parser.mjs` → получает ChordPro + метадату (title, artist, key, capo).
+2. Агент проверяет дубль (GET /api/songs), показывает превью.
+3. На подтверждение → POST /api/songs (`curl` на публичный эндпоинт, admin отключён).
+
+**Парсер** (`scripts/import-parser.mjs`):
+- `--input FILE | --url URL | stdin`, `--source ug|amdm|akkords|auto`.
+- UG: curl/read_web не пройдут (Cloudflare challenge), только copy-paste.
+- amdm: `<pre itemprop="chordsBlock">` + inline `<div class="podbor__chord" data-chord="X">`.
+- akkords: `<p class="chords">` с `<span>`/`<b>`.
+- Детекция секций: `[Verse]`/`[Chorus]`/`[Bridge]`/`Припев:` + **нормализация кириллических лукалайков** (`Сhоrus:` с кир. С/о → Chorus).
+- Табулатура (строки с ≥55% дешей/цифр/пайпов) сохраняется как есть, не мержится с аккордами.
+- Метадата UG: `Title Chords by Artist`, `Capo: N`, `Key: X`.
+- Эмит: `{capo: N}` как ChordPro-директиву в начале chordpro.
 
 ## Хранение настроек
 
@@ -230,7 +253,9 @@ Hex-ввод + color picker. Кнопка "Сбросить цвета темы"
 | Быстрое переключение статуса (публичный API) | Готово |
 | Единое меню действий (SongMenu) в таблице и просмотре | Готово |
 | Единый просмотр песни (SongView) с галерейной навигацией | Готово |
-| Транспонирование (per-song, в sidebar) | Готово |
+| Транспонирование (per-song, в sidebar) | Готово (±12 нормализуется в 0) |
+| Импорт через subagent (UG paste / amdm URL / akkords URL) | Готово |
+| Показ каподастра в правой панели ({capo: N} директива) | Готово |
 | Автопрокрутка | Готово |
 | Fit-to-screen | Готово |
 | Скрытие/показ аккордов | Готово |
