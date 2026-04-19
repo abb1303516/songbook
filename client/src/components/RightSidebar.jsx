@@ -135,6 +135,11 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
     });
   }, [chordpro, transpose, settings.useH]);
 
+  const capo = useMemo(() => {
+    const m = (chordpro || '').match(/\{capo\s*:\s*(\d+)\}/i);
+    return m ? parseInt(m[1], 10) : null;
+  }, [chordpro]);
+
   const validYtUrls = (youtubeUrls || []).filter(u => u && youtubeEmbedUrl(u));
 
   if (!isOpen) return null;
@@ -190,6 +195,11 @@ export default function RightSidebar({ chordpro, transpose = 0, youtubeUrls = []
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </button>
+            {chordsOpen && capo != null && (
+              <div className="text-xs mt-2 font-medium" style={{ color: colors.accent }}>
+                Каподастр: {capo}-й лад
+              </div>
+            )}
             {chordsOpen && uniqueChords.length > 0 && (
               <>
                 {/* Size controls */}

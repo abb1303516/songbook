@@ -56,10 +56,11 @@ export default {
   },
 
   async updateTranspose(req, res) {
-    const { transpose } = req.body;
+    let { transpose } = req.body;
     if (typeof transpose !== 'number' || transpose < -12 || transpose > 12) {
       return res.status(400).json({ error: 'Недопустимое значение транспонирования' });
     }
+    if (transpose === 12 || transpose === -12) transpose = 0;
     const { rows } = await pool.query(
       'UPDATE songs SET transpose = $2, updated_at = NOW() WHERE id = $1 RETURNING id, transpose',
       [req.params.id, transpose]

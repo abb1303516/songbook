@@ -124,7 +124,8 @@ export default function SongView() {
       onTranspose: (delta) => {
         setSong(prev => {
           if (!prev) return prev;
-          const newT = (prev.transpose || 0) + delta;
+          let newT = (prev.transpose || 0) + delta;
+          if (newT === 12 || newT === -12) newT = 0;
           updateSongTranspose(id, newT).catch(() => {});
           return { ...prev, transpose: newT };
         });
